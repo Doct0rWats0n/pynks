@@ -1,7 +1,13 @@
 class Tank:
     def __init__(self, board, sprite, bullet_sprite, speed,
-                 bullet_speed, bullet_power):
+                 bullet_speed, bullet_power, health):
         self.board = board
+        self.health = health
+        self.speed = speed
+        self.bullet_speed = bullet_speed
+        self.sprite = sprite
+        self.bullet_sprite = bullet_sprite
+        self.bullet_power = bullet_power
 
     def render(self):
         pass
@@ -17,3 +23,8 @@ class Tank:
 
     def death(self):
         pass
+
+    def taking_damage(self, damage):
+        self.health -= damage
+        if self.health <= 0:
+            self.death()
