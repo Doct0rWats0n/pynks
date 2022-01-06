@@ -1,6 +1,11 @@
-class Tank:
+import pygame
+from sprite_groups import all_sprites, tank_group
+
+
+class Tank(pygame.sprite.Sprite):
     def __init__(self, board, sprite, bullet_sprite, speed,
                  bullet_speed, bullet_power, health):
+        super().__init__(tank_group, all_sprites)
         self.board = board
         self.health = health
         self.speed = speed
