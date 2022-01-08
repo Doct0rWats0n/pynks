@@ -1,5 +1,5 @@
 import pygame as pg
-from signal_slot_system import Signal
+from event_system import Event
 import GLOBAL
 
 
@@ -9,8 +9,8 @@ class Board:
         self.board = [[0] * width for _ in range(height)]
         self.left, self.top = 10, 10
         self.cell_size = 30
-        self.sig_change_size = Signal()
-        self.sig_change_view = Signal()
+        self.event_change_size = Event()
+        self.sig_change_view = Event()
 
     def set_view(self, left: int, top: int):
         """
@@ -25,7 +25,7 @@ class Board:
         """
         if GLOBAL.MIN_CELL_SIZE <= cell_size <= GLOBAL.MAX_CELL_SIZE:
             self.cell_size = cell_size
-            self.sig_change_size()
+            self.event_change_size()
 
     def get_size(self):
         """
