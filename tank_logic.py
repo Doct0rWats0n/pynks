@@ -23,13 +23,16 @@ class GameObject(pygame.sprite.Sprite):
     def __init__(self, board, sprite, *sprite_group):
         super().__init__(*sprite_group, GLOBAL.all_sprites)
         self.transform = Transform()
+        self.orig_image = sprite
         self.image = sprite
         self.board = board
+        self.board.sig_change_size.connect(self.change_sprite_size)
         self.change_sprite_size()
         self.render()
 
     def change_sprite_size(self):
-        self.image = pygame.transform.scale(self.image, (self.board.cell_size, self.board.cell_size))
+        self.image = pygame.transform.scale(self.orig_image, (self.board.cell_size, self.board.cell_size))
+        self.render()
 
     def render(self):
         self.rect = self.image.get_rect().move(

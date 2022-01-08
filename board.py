@@ -1,4 +1,5 @@
 import pygame as pg
+from signal_slot_system import Signal
 
 
 class Board:
@@ -7,10 +8,12 @@ class Board:
         self.board = [[0] * width for _ in range(height)]
         self.left, self.top = 10, 10
         self.cell_size = 30
+        self.sig_change_size = Signal()
 
     def set_view(self, left, top, cell_size):
         self.left, self.top = left, top
         self.cell_size = cell_size
+        self.sig_change_size()
 
     def render(self, screen: pg.Surface):
         for i in range(self.height):
