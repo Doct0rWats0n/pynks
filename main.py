@@ -51,14 +51,14 @@ if __name__ == '__main__':
             if event.type == pg.MOUSEBUTTONUP:
                 is_touch = False
                 touch_pos = event.pos
-            if event.type == pg.KEYDOWN:
-                board.set_size(board.cell_size + 1)
         # Увеличивает/уменьшает при нажатии и удержании
         pressed_keys = pg.key.get_pressed()
         if pressed_keys[pg.K_UP]:
             board.set_size(board.get_size() + 1)
         if pressed_keys[pg.K_DOWN]:
             board.set_size(board.get_size() - 1)
+        if pressed_keys[pg.K_q]:
+            board.set_view(0, 0)
         surf.fill("black")
         board.render(surf)
         all_sprites.draw(surf)
