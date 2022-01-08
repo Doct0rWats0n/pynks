@@ -1,11 +1,9 @@
 import pygame as pg
 from signal_slot_system import Signal
+import GLOBAL
 
 
 class Board:
-    MIN_CELL_SIZE = 10
-    MAX_CELL_SIZE = 50
-
     def __init__(self, width: int, height: int):
         self.width, self.height = width, height
         self.board = [[0] * width for _ in range(height)]
@@ -25,7 +23,7 @@ class Board:
         """
         Изменение размера игровой клетки
         """
-        if self.MIN_CELL_SIZE <= cell_size <= self.MAX_CELL_SIZE:
+        if GLOBAL.MIN_CELL_SIZE <= cell_size <= GLOBAL.MAX_CELL_SIZE:
             self.cell_size = cell_size
             self.sig_change_size()
 
