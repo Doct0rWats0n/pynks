@@ -31,10 +31,16 @@ class GameObject(pygame.sprite.Sprite):
         self.render()
 
     def change_sprite_size(self):
+        """
+        Меняет размер спрайта
+        """
         self.image = pygame.transform.scale(self.orig_image, (self.board.cell_size, self.board.cell_size))
         self.render()
 
     def render(self):
+        """
+        Подстраивание картинки под игровое поле
+        """
         self.rect = self.image.get_rect().move(
             self.board.cell_size * self.transform.x + self.board.left,
             self.board.cell_size * self.transform.y + self.board.top)
@@ -51,18 +57,32 @@ class Tank(GameObject):
         self.bullet_power = bullet_power
 
     def shot(self):
+        """
+        Обработка выстрела
+        """
         pass
 
     def move(self, vector):
-        pass
+        """
+        Обработка перемещения
+        """
 
     def rotate(self, angle):
+        """
+        Обработка поворота
+        """
         pass
 
     def death(self):
+        """
+        Обработка смерти
+        """
         pass
 
     def taking_damage(self, damage):
+        """
+        Обработка получения урона
+        """
         self.health -= damage
         if self.health <= 0:
             self.death()
