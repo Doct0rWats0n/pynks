@@ -9,8 +9,7 @@ import sys
 def load_image(name):
     fullname = os.path.join('data/image', name)
     if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
+        raise FileNotFoundError(f"Image '{fullname}' not found")
     image = pg.image.load(fullname)
     return image
 
@@ -21,7 +20,7 @@ if __name__ == '__main__':
     pg.display.set_caption('Инициализация игры')
 
     board = Board(8, 6)
-    board.set_view(0, 0, 100)
+    board.set_view(0, 0, 20)
     tank = Tank(board, load_image("Tank.png"))
     playing = True
     while playing:
@@ -32,7 +31,9 @@ if __name__ == '__main__':
                 xy = board.get_cell(event.pos)
                 tank.transform.set_position(xy[0], xy[1])
                 tank.render()
-                print(board.get_cell(event.pos))
+            if event.type == pg.KEYDOWN:
+                board.set_view(board.left, board.top, board.cell_size + 1)
+
         surf.fill("black")
         all_sprites.draw(surf)
         board.render(surf)
