@@ -20,22 +20,37 @@ if __name__ == '__main__':
     pg.display.set_caption('Инициализация игры')
 
     board = Board(8, 6)
-    board.set_view(0, 0, 20)
+    board.set_view(0, 0)
+    board.set_size(40)
     tank = Tank(board, load_image("Tank.png"))
+    tank1 = Tank(board, load_image("Tank.png"))
     playing = True
+    is_touch = False
     while playing:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 playing = False
             if event.type == pg.MOUSEBUTTONDOWN:
+                is_touch = True
+                touch_pos = event.pos
                 xy = board.get_cell(event.pos)
-                tank.transform.set_position(xy[0], xy[1])
-                tank.render()
+                left, top = board.left, board.top
+                if xy:
+                    tank.transform.set_position(xy[0], xy[1])
+                    tank.render()
+            if event.type == pg.MOUSEMOTION:
+                mpos = event.pos
+                if is_touch:
+                    r = list(map(lambda x, y: y - x, touch_pos, mpos))
+                    board.set_view(left + r[0], top + r[1])
+            if event.type == pg.MOUSEBUTTONUP:
+                is_touch = False
+                touch_pos = event.pos
             if event.type == pg.KEYDOWN:
-                board.set_view(board.left, board.top, board.cell_size + 1)
+                board.set_size(board.cell_size + 1)
 
         surf.fill("black")
-        all_sprites.draw(surf)
         board.render(surf)
+        all_sprites.draw(surf)
         pg.display.flip()
     pg.quit()

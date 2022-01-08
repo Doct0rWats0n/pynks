@@ -9,11 +9,16 @@ class Board:
         self.left, self.top = 10, 10
         self.cell_size = 30
         self.sig_change_size = Signal()
+        self.sig_change_view = Signal()
 
-    def set_view(self, left, top, cell_size):
-        self.left, self.top = left, top
+    def set_size(self, cell_size):
         self.cell_size = cell_size
         self.sig_change_size()
+
+    def set_view(self, left, top):
+        self.left = left
+        self.top = top
+        self.sig_change_view()
 
     def render(self, screen: pg.Surface):
         for i in range(self.height):
