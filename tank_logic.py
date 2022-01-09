@@ -27,7 +27,7 @@ class GameObject(pygame.sprite.Sprite):
         self.image = sprite
         self.board = board
         self.board.event_change_size.connect(self.change_sprite_size)
-        self.board.sig_change_view.connect(self.render)
+        self.board.event_change_view.connect(self.render)
         self.change_sprite_size()
         self.render()
 

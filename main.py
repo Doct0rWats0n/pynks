@@ -36,11 +36,11 @@ if __name__ == '__main__':
             if event.type == pg.QUIT:
                 playing = False
             if event.type == pg.MOUSEBUTTONDOWN:
-                is_touch = True
-                touch_pos = event.pos
                 xy = board.get_cell(event.pos)
-                left, top = board.left, board.top
                 if xy:
+                    is_touch = True
+                    touch_pos = event.pos
+                    left, top = board.left, board.top
                     tank.transform.set_position(xy[0], xy[1])
                     tank.render()
             if event.type == pg.MOUSEMOTION:
