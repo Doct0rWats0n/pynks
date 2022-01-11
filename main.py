@@ -1,20 +1,40 @@
-from tank_logic import Tank
+from tank_logic import Tank, BlockWall
 from board import Board
 from GLOBAL import all_sprites
+import GLOBAL
 import pygame as pg
 import os
 import sys
 
 
-def load_image(name: str):
-    """
-    Загрузка изображения
-    """
-    fullname = os.path.join('data/image', name)
-    if not os.path.isfile(fullname):
-        raise FileNotFoundError(f"Image '{fullname}' not found")
-    image = pg.image.load(fullname)
-    return image
+class LoadData:
+    @staticmethod
+    def load_image(name: str):
+        """ Загрузка изображения """
+        fullname = os.path.join('data/image', name)
+        if not os.path.isfile(fullname):
+            raise FileNotFoundError(f"Image '{fullname}' not found")
+        image = pg.image.load(fullname)
+        return image
+
+    @staticmethod
+    def load_level():
+        return
+
+
+class App:
+    def __init__(self):
+        self.screen = pg.display.set_mode(GLOBAL.SIZE)
+        self.clock = pg.time.Clock()
+        self.FPS = 60
+
+    def run(self):
+        board = Board(20, 20)
+        board.set_view(0, 0)
+        board.set_size(40)
+        while True:
+            if event.type == pg.QUIT:
+                pg.quit()
 
 
 if __name__ == '__main__':
@@ -22,12 +42,13 @@ if __name__ == '__main__':
     surf = pg.display.set_mode(SIZE)
     pg.display.set_caption('Инициализация игры')
 
-    board = Board(8, 6)
+    board = Board(20, 20)
     board.set_view(0, 0)
     board.set_size(40)
-    tank = Tank(board, load_image("Tank.png"))
-    tank1 = Tank(board, load_image("Tank.png"))
-    clocker = pg.time.Clock()
+    tank = Tank(board, LoadData.load_image("Tank.png"))
+    tank.transform.set_position(4, 3)
+    tank.render()
+    clock = pg.time.Clock()
     FPS = 60
     playing = True
     is_touch = False
@@ -37,12 +58,13 @@ if __name__ == '__main__':
                 playing = False
             if event.type == pg.MOUSEBUTTONDOWN:
                 xy = board.get_cell(event.pos)
+                is_touch = True
+                touch_pos = event.pos
+                left, top = board.left, board.top
                 if xy:
-                    is_touch = True
-                    touch_pos = event.pos
-                    left, top = board.left, board.top
-                    tank.transform.set_position(xy[0], xy[1])
-                    tank.render()
+                    b = BlockWall(board, LoadData.load_image("wall.png"))
+                    b.transform.set_position(xy[0], xy[1])
+                    b.render()
             if event.type == pg.MOUSEMOTION:
                 mpos = event.pos
                 if is_touch:
@@ -51,6 +73,16 @@ if __name__ == '__main__':
             if event.type == pg.MOUSEBUTTONUP:
                 is_touch = False
                 touch_pos = event.pos
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_d:
+                    tank.rotate(270)
+                if event.key == pg.K_a:
+                    tank.rotate(90)
+                if event.key == pg.K_s:
+                    tank.rotate(180)
+                if event.key == pg.K_w:
+                    tank.rotate(0)
+
         # Увеличивает/уменьшает при нажатии и удержании
         pressed_keys = pg.key.get_pressed()
         if pressed_keys[pg.K_UP]:
@@ -59,9 +91,18 @@ if __name__ == '__main__':
             board.set_size(board.get_size() - 1)
         if pressed_keys[pg.K_q]:
             board.set_view(0, 0)
+        if pressed_keys[pg.K_w]:
+            tank.move((0, -1))
+        if pressed_keys[pg.K_s]:
+            tank.move((0, 1))
+        if pressed_keys[pg.K_a]:
+            tank.move((-1, 0))
+        if pressed_keys[pg.K_d]:
+            tank.move((1, 0))
         surf.fill("black")
-        board.render(surf)
+        #board.render(surf)
         all_sprites.draw(surf)
         pg.display.flip()
-        clocker.tick(FPS)
+        clock.tick(FPS)
+        pg.display.set_caption(f'{clock.get_fps()}')
     pg.quit()
