@@ -1,26 +1,12 @@
-from tank_logic import Tank, BlockWall, Player
+from tank_logic import Tank, BlockWall, Player, Bullet
 from event_system import Event
 from board import Board
 from GLOBAL import all_sprites
 import GLOBAL
 import pygame as pg
+from base import LoadData
 import os
 import sys
-
-
-class LoadData:
-    @staticmethod
-    def load_image(name: str):
-        """ Загрузка изображения """
-        fullname = os.path.join('data/image', name)
-        if not os.path.isfile(fullname):
-            raise FileNotFoundError(f"Image '{fullname}' not found")
-        image = pg.image.load(fullname)
-        return image
-
-    @staticmethod
-    def load_level():
-        return
 
 
 class App:
@@ -37,6 +23,8 @@ class App:
         tank = Player(board, LoadData.load_image("Tank.png"))
         tank.transform.set_position(0, 0)
         tank.render()
+        bullet = Bullet(board, LoadData.load_image("bullet.png"))
+        bullet.transform.set_position(2, 2)
         playing = True
         is_touch = False
         while playing:
@@ -57,14 +45,17 @@ class App:
                     is_touch = False
                     touch_pos = event.pos
                 if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_m:
+                        b = tank.shot()
+                        b.render()
                     if event.key == pg.K_d:
-                        tank.rotate(270)
+                        tank.transform.set_angle(270)
                     if event.key == pg.K_a:
-                        tank.rotate(90)
+                        tank.transform.set_angle(90)
                     if event.key == pg.K_s:
-                        tank.rotate(180)
+                        tank.transform.set_angle(180)
                     if event.key == pg.K_w:
-                        tank.rotate(0)
+                        tank.transform.set_angle(0)
                     if event.key == pg.K_UP:
                         board.set_size(board.get_size() + 10)
                     if event.key == pg.K_DOWN:
