@@ -14,8 +14,8 @@ class UI:
         self.on_click = Event()
         self.on_hover = Event()
 
-    def render(self):
-        pass
+    def click(self):
+        self.on_click()
 
 
 class Transform:
