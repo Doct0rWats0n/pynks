@@ -48,10 +48,6 @@ class App:
                     is_touch = True
                     touch_pos = event.pos
                     left, top = board.left, board.top
-                    if xy:
-                        b = BlockWall(board, LoadData.load_image("wall.png"))
-                        b.transform.set_position(xy[0], xy[1])
-                        b.render()
                 if event.type == pg.MOUSEMOTION:
                     mpos = event.pos
                     if is_touch:
