@@ -1,18 +1,14 @@
 from board import Board
 import GLOBAL
 from base import GameObject
+from loaddata import LoadData
 import pygame as pg
-
-
-class BlockWall(GameObject):
-    def __init__(self, board, sprite):
-        super().__init__(board, sprite, GLOBAL.wall_layout)
 
 
 class Tank(GameObject):
     def __init__(self, board: Board, sprite, bullet_sprite=None, speed=0.1,
-                 bullet_speed=40, bullet_power=1, health=1):
-        super().__init__(board, sprite, GLOBAL.tank_layout)
+                 bullet_speed=40, bullet_power=1, health=1, x=0, y=0, angle=0):
+        super().__init__(board, sprite, GLOBAL.tank_layout, x=x, y=y, angle=angle)
         self.health = health
         self.speed = speed
         self.bullet_speed = bullet_speed
@@ -21,18 +17,28 @@ class Tank(GameObject):
 
     def shot(self):
         """ Обработка выстрела """
-        pass
+        if self.transform.angle == 360:
+            pos = [self.transform.size / 2 - 0.1, -0.2]
+        elif self.transform.angle == 180:
+            pos = [self.transform.size / 2 - 0.1, 0.7]
+        elif self.transform.angle == 90:
+            pos = [-0.2, self.transform.size / 2 - 0.1]
+        elif self.transform.angle == 270:
+            pos = [0.7, self.transform.size / 2 - 0.1]
+        Bullet(self.board, LoadData.load_image("bullet.png"),
+               x=self.transform.x + pos[0],
+               y=self.transform.y + pos[1],
+               angle=self.transform.get_angle())
 
     def move(self, vector):
         """ Обработка перемещения """
         self.transform.x += vector[0] * self.speed
+        if pg.sprite.spritecollideany(self, GLOBAL.wall_layout):
+            pass
         self.transform.y += vector[1] * self.speed
-        self.render()
-
-    def rotate(self, angle: float):
-        """ Обработка поворота """
-        self.transform.set_angle(angle)
-        self.change_sprite_size()
+        if pg.sprite.spritecollideany(self, GLOBAL.wall_layout):
+            pass
+        self.event_on_move()
 
     def death(self):
         """ Обработка смерти """
@@ -46,8 +52,8 @@ class Tank(GameObject):
 
 
 class Player(Tank):
-    def __init__(self, board: Board, sprite):
-        super().__init__(board, sprite)
+    def __init__(self, board: Board, sprite, x=0, y=0, angle=0):
+        super().__init__(board, sprite, x=x, y=y, angle=angle)
 
     def movement(self):
         pressed_keys = pg.key.get_pressed()
@@ -62,7 +68,25 @@ class Player(Tank):
 
 
 class Bullet(GameObject):
-    def __init__(self, board, sprite, speed, power):
-        super().__init__(board, sprite, GLOBAL.bullet_layout)
+    def __init__(self, board, sprite, speed=0.3, power=1, x=0, y=0, angle=0):
+        super().__init__(board, sprite, GLOBAL.bullet_layout, x=x, y=y, angle=angle)
+        self.transform.size = 0.4
         self.speed = speed
         self.power = power
+        self.change_sprite_size()
+        self.vec = [0, 0]
+        if self.transform.angle == 360:
+            self.vec[1] = -1
+        if self.transform.angle == 180:
+            self.vec[1] = 1
+        if self.transform.angle == 90:
+            self.vec[0] = -1
+        if self.transform.angle == 270:
+            self.vec[0] = 1
+
+    def move(self):
+        self.transform.x += self.speed * self.vec[0]
+        self.transform.y += self.speed * self.vec[1]
+        if pg.sprite.spritecollideany(self, GLOBAL.wall_layout):
+            self.kill()
+        self.event_on_move()

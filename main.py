@@ -1,26 +1,8 @@
-from tank_logic import Tank, BlockWall, Player
-from event_system import Event
+from tank_logic import Player
 from board import Board
-from GLOBAL import all_sprites
 import GLOBAL
 import pygame as pg
-import os
-import sys
-
-
-class LoadData:
-    @staticmethod
-    def load_image(name: str):
-        """ Загрузка изображения """
-        fullname = os.path.join('data/image', name)
-        if not os.path.isfile(fullname):
-            raise FileNotFoundError(f"Image '{fullname}' not found")
-        image = pg.image.load(fullname)
-        return image
-
-    @staticmethod
-    def load_level():
-        return
+from loaddata import LoadData
 
 
 class App:
@@ -34,9 +16,8 @@ class App:
         board = Board(8, 6)
         board.set_view(0, 0)
         board.set_size(40)
-        tank = Player(board, LoadData.load_image("Tank.png"))
-        tank.transform.set_position(0, 0)
-        tank.render()
+        LoadData.load_level(board, "map1.txt")
+        tank = Player(board, LoadData.load_image("Tank.png"), x=3, y=1)
         playing = True
         is_touch = False
         while playing:
@@ -57,14 +38,16 @@ class App:
                     is_touch = False
                     touch_pos = event.pos
                 if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_m:
+                        tank.shot()
                     if event.key == pg.K_d:
-                        tank.rotate(270)
+                        tank.transform.set_angle(270)
                     if event.key == pg.K_a:
-                        tank.rotate(90)
+                        tank.transform.set_angle(90)
                     if event.key == pg.K_s:
-                        tank.rotate(180)
+                        tank.transform.set_angle(180)
                     if event.key == pg.K_w:
-                        tank.rotate(0)
+                        tank.transform.set_angle(0)
                     if event.key == pg.K_UP:
                         board.set_size(board.get_size() + 10)
                     if event.key == pg.K_DOWN:
@@ -74,8 +57,13 @@ class App:
                                        -tank.transform.y * board.cell_size + GLOBAL.HEIGHT // 2 - board.cell_size // 2)
             tank.movement()
             self.screen.fill("black")
-            board.render(self.screen)
-            all_sprites.draw(self.screen)
+            #board.render(self.screen)
+            GLOBAL.under_block_layout.draw(self.screen)
+            GLOBAL.tank_layout.draw(self.screen)
+            for i in GLOBAL.bullet_layout:
+                i.move()
+            GLOBAL.bullet_layout.draw(self.screen)
+            GLOBAL.block_layout.draw(self.screen)
             pg.display.flip()
             self.clock.tick(self.FPS)
             pg.display.set_caption(f'{self.clock.get_fps()}')
