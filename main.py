@@ -1,12 +1,8 @@
-from tank_logic import Tank, BlockWall, Player, Bullet
-from event_system import Event
+from tank_logic import Player
 from board import Board
-from GLOBAL import all_sprites
 import GLOBAL
 import pygame as pg
-from base import LoadData
-import os
-import sys
+from loaddata import LoadData
 
 
 class App:
@@ -20,11 +16,8 @@ class App:
         board = Board(8, 6)
         board.set_view(0, 0)
         board.set_size(40)
-        tank = Player(board, LoadData.load_image("Tank.png"))
-        tank.transform.set_position(0, 0)
-        tank.render()
-        bullet = Bullet(board, LoadData.load_image("bullet.png"))
-        bullet.transform.set_position(2, 2)
+        LoadData.load_level(board, "map1.txt")
+        tank = Player(board, LoadData.load_image("Tank.png"), x=3, y=1)
         playing = True
         is_touch = False
         while playing:
@@ -46,8 +39,7 @@ class App:
                     touch_pos = event.pos
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_m:
-                        b = tank.shot()
-                        b.render()
+                        tank.shot()
                     if event.key == pg.K_d:
                         tank.transform.set_angle(270)
                     if event.key == pg.K_a:
@@ -65,8 +57,13 @@ class App:
                                        -tank.transform.y * board.cell_size + GLOBAL.HEIGHT // 2 - board.cell_size // 2)
             tank.movement()
             self.screen.fill("black")
-            board.render(self.screen)
-            all_sprites.draw(self.screen)
+            #board.render(self.screen)
+            GLOBAL.under_block_layout.draw(self.screen)
+            GLOBAL.tank_layout.draw(self.screen)
+            for i in GLOBAL.bullet_layout:
+                i.move()
+            GLOBAL.bullet_layout.draw(self.screen)
+            GLOBAL.block_layout.draw(self.screen)
             pg.display.flip()
             self.clock.tick(self.FPS)
             pg.display.set_caption(f'{self.clock.get_fps()}')
