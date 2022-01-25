@@ -31,3 +31,7 @@ class Brick(Block):
     def __init__(self, board, x=0, y=0):
         super().__init__(board, GLOBAL.wall_sprite, GLOBAL.wall_layout, x=x, y=y)
 
+
+class Base(Block):
+    def __init__(self, board, x=0, y=0):
+        super().__init__(board, GLOBAL.base_sprite, GLOBAL.base_layout, x=x, y=y)
