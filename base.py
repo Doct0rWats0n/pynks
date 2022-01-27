@@ -85,3 +85,26 @@ class GameObject(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             (self.board.cell_size * self.transform.x + self.board.left),
             (self.board.cell_size * self.transform.y + self.board.top))
+
+
+class AnimatedGameObject(GameObject):
+    def __init__(self, board, sprite, *sprite_group, x=0, y=0, angle=0, size=1):
+        self.frames = sprite
+        self.cur_frame = 0
+        self.animation_speed = 20
+        self.cur_tick = 0
+        super().__init__(board, sprite[0], *sprite_group, GLOBAL.animated_layout, x=x, y=y, angle=angle, size=size)
+
+    def render(self):
+        self.image = pygame.transform.scale(self.frames[self.cur_frame],
+                                            (self.board.cell_size * self.transform.size * self.ratio,
+                                             self.board.cell_size * self.transform.size))
+        self.rect = self.image.get_rect().move(
+            (self.board.cell_size * self.transform.x + self.board.left),
+            (self.board.cell_size * self.transform.y + self.board.top))
+
+    def add_tick(self):
+        if self.cur_tick == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.render()
+        self.cur_tick = (self.cur_tick + 1) % self.animation_speed

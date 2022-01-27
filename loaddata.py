@@ -2,6 +2,8 @@ import os
 import pygame as pg
 import blocks
 
+pg.init()
+
 
 class LoadData:
     @staticmethod
@@ -31,6 +33,8 @@ class LoadData:
                     blocks.Bush(board, x=ind_x, y=ind_y)
                 elif block == 'X':
                     blocks.Base(board, x=ind_x, y=ind_y)
+                elif block == 'R':
+                    blocks.RedBarrel(board, x=ind_x, y=ind_y)
 
     @staticmethod
     def load_sound(file_name):
