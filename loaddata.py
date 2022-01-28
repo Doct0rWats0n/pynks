@@ -1,6 +1,9 @@
 import os
 import pygame as pg
+import pygame.image
+
 import blocks
+from PIL import Image
 
 pg.init()
 
@@ -13,6 +16,23 @@ class LoadData:
         if not os.path.isfile(full_name):
             raise FileNotFoundError(f"Image '{full_name}' not found")
         return pg.image.load(full_name)
+
+    @staticmethod
+    def load_sheet(file_name: str, columns=1, rows=1):
+        full_name = os.path.join('data/image', file_name)
+        if not os.path.isfile(full_name):
+            raise FileNotFoundError(f"Image '{full_name}' not found")
+        sheet = Image.open(full_name)
+        width, height = sheet.size
+        width //= columns
+        height //= rows
+        images = []
+        for r in range(rows):
+            for c in range(columns):
+                im = sheet.crop((width * c, height * r,
+                                 width * c + width, height * r + height))
+                images.append(pygame.image.fromstring(im.tobytes(), im.size, im.mode))
+        return images
 
     @staticmethod
     def load_level(board, file_name):
@@ -42,4 +62,3 @@ class LoadData:
         if not os.path.isfile(full_name):
             raise FileNotFoundError(f"Sound '{full_name}' not found")
         return pg.mixer.Sound(full_name)
-

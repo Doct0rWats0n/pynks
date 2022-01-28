@@ -8,8 +8,8 @@ class Block(base.GameObject):
 
 
 class AnimatedBlock(base.AnimatedGameObject):
-    def __init__(self, board, sprite, *layout, x=0, y=0):
-        super().__init__(board, sprite, GLOBAL.block_layout, *layout, x=x, y=y)
+    def __init__(self, board, sprite, *layout, x=0, y=0, animation_speed=20):
+        super().__init__(board, sprite, GLOBAL.block_layout, *layout, x=x, y=y, animation_speed=animation_speed)
 
 
 class UnderBlock(base.GameObject):
@@ -44,4 +44,5 @@ class Base(Block):
 
 class RedBarrel(AnimatedBlock):
     def __init__(self, board, x=0, y=0):
-        super().__init__(board, GLOBAL.barrel_sprite, GLOBAL.barrel_layout, GLOBAL.wall_layout, x=x, y=y)
+        super().__init__(board, GLOBAL.barrel_sprite,
+                         GLOBAL.barrel_layout, GLOBAL.wall_layout, x=x, y=y, animation_speed=30)

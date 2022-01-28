@@ -88,12 +88,13 @@ class GameObject(pygame.sprite.Sprite):
 
 
 class AnimatedGameObject(GameObject):
-    def __init__(self, board, sprite, *sprite_group, x=0, y=0, angle=0, size=1):
+    def __init__(self, board, sprite, *sprite_group, x=0, y=0, angle=0, size=1, animation_speed=20):
         self.frames = sprite
         self.cur_frame = 0
-        self.animation_speed = 20
+        self.animation_speed = animation_speed
         self.cur_tick = 0
         super().__init__(board, sprite[0], *sprite_group, GLOBAL.animated_layout, x=x, y=y, angle=angle, size=size)
+        self.board.event_tick.connect(self.add_tick)
 
     def render(self):
         self.image = pygame.transform.scale(self.frames[self.cur_frame],
