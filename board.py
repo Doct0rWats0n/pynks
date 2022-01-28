@@ -11,6 +11,7 @@ class Board:
         self.cell_size = 30
         self.event_change_size = Event()
         self.event_change_view = Event()
+        self.event_tick = Event()
 
     def set_view(self, left: int, top: int):
         """ Изменение положения игрового поля """
