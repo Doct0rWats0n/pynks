@@ -65,8 +65,10 @@ class GameObject(pygame.sprite.Sprite):
         self.board = board
         s = self.orig_image.get_size()
         self.ratio = s[0] / s[1]
-        self.board.event_change_size.connect(self.change_sprite_size)
-        self.board.event_change_view.connect(self.render)
+        GLOBAL.event_tick.connect(self.check_tick, 0)
+        GLOBAL.event_change_size.connect(self.change_sprite_size)
+        GLOBAL.event_change_view.connect(self.render)
+        GLOBAL.event_tick.connect(self.add_tick)
         self.transform.set_angle(angle)
         self.change_sprite_size()
         self.event_on_move = Event()
@@ -86,6 +88,14 @@ class GameObject(pygame.sprite.Sprite):
             (self.board.cell_size * self.transform.x + self.board.left),
             (self.board.cell_size * self.transform.y + self.board.top))
 
+    def add_tick(self):
+        # virtual method
+        pass
+
+    def check_tick(self):
+        # virtual method
+        pass
+
 
 class AnimatedGameObject(GameObject):
     def __init__(self, board, sprite, *sprite_group, x=0, y=0, angle=0, size=1, animation_speed=20):
@@ -94,7 +104,6 @@ class AnimatedGameObject(GameObject):
         self.animation_speed = animation_speed
         self.cur_tick = 0
         super().__init__(board, sprite[0], *sprite_group, GLOBAL.animated_layout, x=x, y=y, angle=angle, size=size)
-        self.board.event_tick.connect(self.add_tick)
 
     def render(self):
         self.image = pygame.transform.scale(self.frames[self.cur_frame],
@@ -105,7 +114,43 @@ class AnimatedGameObject(GameObject):
             (self.board.cell_size * self.transform.y + self.board.top))
 
     def add_tick(self):
+        self.cur_tick = (self.cur_tick + 1) % self.animation_speed
         if self.cur_tick == 0:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.render()
-        self.cur_tick = (self.cur_tick + 1) % self.animation_speed
+
+
+class Collide(pygame.sprite.Sprite):
+    def __init__(self, tank, xy1, xy2):
+        super().__init__(GLOBAL.collide_layout)
+        self.tank = tank
+        self.const_pos = xy1
+        self.transform = Transform(xy1[0] + self.tank.transform.x,
+                                   xy1[1] + self.tank.transform.y)
+        self.size = xy2
+        self.orig_image = GLOBAL.collide_sprite
+        self.image = GLOBAL.collide_sprite
+        self.is_collide = False
+        self.change_sprite_size()
+        self.tank.event_on_move.connect(self.move)
+        GLOBAL.event_tick.connect(self.check_tick, 0)
+        GLOBAL.event_change_size.connect(self.change_sprite_size)
+        GLOBAL.event_change_view.connect(self.render)
+
+    def check_tick(self):
+        self.is_collide = pygame.sprite.spritecollideany(self, GLOBAL.wall_layout)
+
+    def move(self):
+        self.transform.set_position(self.const_pos[0] + self.tank.transform.x,
+                                    self.const_pos[1] + self.tank.transform.y)
+        self.render()
+
+    def change_sprite_size(self):
+        self.image = pygame.transform.scale(self.orig_image, (self.size[0] * self.tank.board.cell_size,
+                                                              self.size[1] * self.tank.board.cell_size))
+        self.render()
+
+    def render(self):
+        self.rect = self.image.get_rect().move(
+            (self.tank.board.cell_size * self.transform.x + self.tank.board.left),
+            (self.tank.board.cell_size * self.transform.y + self.tank.board.top))

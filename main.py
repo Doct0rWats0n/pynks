@@ -1,4 +1,4 @@
-from tank_logic import Player
+from tank_logic import Player, Tank
 from board import Board
 import GLOBAL
 import pygame as pg
@@ -18,8 +18,7 @@ class App:
         board.set_size(40)
         LoadData.load_level(board, "map1.txt")
         LoadData.load_sheet("red_barrel_sheet.png", 2)
-        tank = Player(board, LoadData.load_image("Tank.png"), x=3, y=1)
-
+        tank = Player(board, x=3, y=1)
         playing = True
         is_touch = False
         while playing:
@@ -54,8 +53,6 @@ class App:
                         board.set_size(board.get_size() + 10)
                     if event.key == pg.K_DOWN:
                         board.set_size(board.get_size() - 10)
-                    if event.key == pg.K_RIGHT:
-                        tank.death()
                     if event.key == pg.K_q:
                         board.set_view(-tank.transform.x * board.cell_size + GLOBAL.WIDTH // 2 - board.cell_size // 2,
                                        -tank.transform.y * board.cell_size + GLOBAL.HEIGHT // 2 - board.cell_size // 2)
@@ -67,7 +64,8 @@ class App:
                 i.move()
             GLOBAL.bullet_layout.draw(self.screen)
             GLOBAL.block_layout.draw(self.screen)
-            board.event_tick()
+            GLOBAL.collide_layout.draw(self.screen)
+            GLOBAL.event_tick()
             pg.display.flip()
             self.clock.tick(self.FPS)
             pg.display.set_caption(f'{self.clock.get_fps()}')
