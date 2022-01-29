@@ -13,13 +13,16 @@ class Event:
             else:
                 del self.subscribers[ind]
 
-    def connect(self, function):
+    def connect(self, function, ind=None):
         """ Подключение к событию """
         if function in self.subscribers:
             raise EventException(f'The function "{function.__name__}" was already signed')
         if not inspect.isfunction(function) and not inspect.ismethod(function):
             raise EventException(f'"{function.__name__} is not function or method"')
-        self.subscribers.append(function)
+        if ind is None:
+            self.subscribers.append(function)
+        else:
+            self.subscribers.insert(ind, function)
 
     def disconnect(self, slot):
         """ Отключение от события """
