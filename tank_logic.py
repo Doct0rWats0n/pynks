@@ -114,6 +114,8 @@ class Bullet(GameObject):
         self.power = power
         self.shoot = GLOBAL.shoot_sound
         self.change_sprite_size()
+        GLOBAL.event_tick.connect(self.move)
+        self.is_boomed = False
         self.vec = [0, 0]
         if self.transform.angle == 360:
             self.vec[1] = -1
@@ -127,8 +129,11 @@ class Bullet(GameObject):
     def move(self):
         self.transform.x += self.speed * self.vec[0]
         self.transform.y += self.speed * self.vec[1]
-        if pg.sprite.spritecollideany(self, GLOBAL.wall_layout):
+        if pg.sprite.spritecollideany(self, GLOBAL.wall_layout) and not self.is_boomed:
+            self.is_boomed = True
             self.shoot.play()
+            if pg.sprite.spritecollideany(self, GLOBAL.brick_layout):
+                pg.sprite.spritecollideany(self, GLOBAL.brick_layout).kill()
             blocks.Boom(self.board, self.transform.x - 0.5,
                         self.transform.y - 0.5)
             self.kill()

@@ -4,18 +4,33 @@ import GLOBAL
 from event_system import Event
 
 
-class UI:
-    def __init__(self, size: (100, 50)):
-        self.size = size
-        self.transform = Transform()
+class UI(pygame.sprite.Sprite):
+    def __init__(self, sprite, *sprite_group, x=0, y=0, center=None):
+        super().__init__(GLOBAL.ui_layout, *sprite_group)
+        self.image = sprite
+        self.rect = self.image.get_rect()
+        self.center = center
+        self.transform = Transform(x=x, y=y)
+        GLOBAL.event_window_resize.connect(self.render)
+        GLOBAL.event_click.connect(self.click)
+        self.render()
         self.event_init()
 
     def event_init(self):
         self.on_click = Event()
         self.on_hover = Event()
 
-    def click(self):
-        self.on_click()
+    def click(self, pos):
+        if self.rect.collidepoint(pos):
+            self.on_click()
+
+    def render(self):
+        if self.center:
+            self.rect = self.image.get_rect(). \
+                move(GLOBAL.SIZE[0] // 2 - self.image.get_width() // 2 + self.transform.x,
+                     GLOBAL.SIZE[1] // 2 - self.image.get_height() // 2 + self.transform.y)
+        else:
+            self.rect = self.image.get_rect().move(self.transform.x, self.transform.y)
 
 
 class Transform:
@@ -138,7 +153,10 @@ class Collide(pygame.sprite.Sprite):
         GLOBAL.event_change_view.connect(self.render)
 
     def check_tick(self):
-        self.is_collide = pygame.sprite.spritecollideany(self, GLOBAL.wall_layout)
+        if pygame.sprite.spritecollideany(self, GLOBAL.wall_layout):
+            self.is_collide = True
+        else:
+            self.is_collide = False
 
     def move(self):
         self.transform.set_position(self.const_pos[0] + self.tank.transform.x,
