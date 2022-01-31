@@ -1,10 +1,8 @@
 import os
 import pygame as pg
 import pygame.image
-
 import blocks
 from PIL import Image
-
 pg.init()
 
 
