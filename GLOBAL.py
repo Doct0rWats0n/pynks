@@ -44,12 +44,13 @@ ALL_GROUPS = [all_sprites,
               collide_layout]
 
 player_sprite = LoadData.load_image("Tank.png")
+enemy_sprite = LoadData.load_image("enemy.png")
 bullet_sprite = LoadData.load_image("bullet.png")
 indestructible_wall_sprite = LoadData.load_image("block_wall.png")
 bush_sprite = LoadData.load_image("kust.png")
 ice_sprite = LoadData.load_image("water.png")
 wall_sprite = LoadData.load_image("wall.png")
-base_sprite = LoadData.load_image("baseUK.png")
+base_sprite = LoadData.load_image("baseRU.png")
 game_over_sprite = LoadData.load_image('gameover.png')
 barrel_sprite = LoadData.load_sheet("red_barrel_sheet.png", columns=2)
 boom_sprite = LoadData.load_sheet("boom_sheet.png", columns=3)
@@ -57,6 +58,8 @@ boom_sprite = LoadData.load_sheet("boom_sheet.png", columns=3)
 hit_sound = LoadData.load_sound("tank_hit.wav")
 shoot_sound = LoadData.load_sound("bullet.wav")
 explosion = LoadData.load_sound("explosion.wav")
+bip = LoadData.load_sound('bip.wav')
+win_sound = LoadData.load_sound('win.wav')
 
 event_defeat = Event()
 event_tick = Event()
@@ -64,6 +67,9 @@ event_change_size = Event()
 event_change_view = Event()
 event_window_resize = Event()
 event_click = Event()
+event_hold = Event()
+event_move = Event()
+event_kill = Event()
 
 MIN_CELL_SIZE = 10
 MAX_CELL_SIZE = 100

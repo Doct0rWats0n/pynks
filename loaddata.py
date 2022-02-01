@@ -34,6 +34,8 @@ class LoadData:
 
     @staticmethod
     def load_level(board, file_name):
+        spwn_points = []
+        spwm_pl = None
         full_name = os.path.join('data/map', file_name)
         if not os.path.isfile(full_name):
             raise FileNotFoundError(f"Map '{full_name}' not found")
@@ -53,6 +55,12 @@ class LoadData:
                     blocks.Base(board, x=ind_x, y=ind_y)
                 elif block == 'R':
                     blocks.RedBarrel(board, x=ind_x, y=ind_y)
+                elif block == 'T':
+                    spwn_points.append([ind_x, ind_y])
+                elif block == 'P':
+                    spwm_pl = ind_x, ind_y
+        return spwn_points, spwm_pl
+
 
     @staticmethod
     def load_sound(file_name):
