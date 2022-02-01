@@ -1,7 +1,6 @@
 from board import Board
 import GLOBAL
 from base import GameObject, Collide
-from loaddata import LoadData
 import pygame as pg
 import blocks
 
@@ -17,8 +16,8 @@ class Tank(GameObject):
         self.bullet_speed = bullet_speed
         self.bullet_sprite = bullet_sprite
         self.bullet_power = bullet_power
-        self.shoot_sound = LoadData.load_sound("tank_hit.wav")
-        self.explosion_sound = LoadData.load_sound("explosion.wav")
+        self.shoot_sound = GLOBAL.hit_sound
+        self.explosion_sound = GLOBAL.explosion
         self.enemy_bullet_group = GLOBAL.player_bullet_layout
         self.this_bullet_group = GLOBAL.enemy_bullet_layout
         self.is_dead = False
@@ -26,6 +25,8 @@ class Tank(GameObject):
         self.collide_down = Collide(self, (0.15, 0.85), (0.7, 0.1))
         self.collide_left = Collide(self, (0.05, 0.15), (0.1, 0.7))
         self.collide_right = Collide(self, (0.85, 0.15), (0.1, 0.7))
+        self.collides = [self.collide_up, self.collide_down,
+                         self.collide_left, self.collide_right]
 
     def remake_collide(self):
         pass
@@ -63,7 +64,7 @@ class Tank(GameObject):
                    y=self.transform.y + pos[1],
                    angle=self.transform.get_angle(), bullet_group=self.this_bullet_group)
 
-    def move(self, vector):
+    def move(self, vector: tuple[int, int]):
         """ Обработка перемещения """
         if (not self.collide_up.is_collide and vector == (0, -1)) or \
                 (not self.collide_down.is_collide and vector == (0, 1)):
@@ -76,6 +77,10 @@ class Tank(GameObject):
     def death(self):
         """ Обработка смерти """
         self.is_dead = True
+        GLOBAL.event_kill()
+        for i in self.collides:
+            i.disconnect()
+            i.kill()
         blocks.Boom(self.board, x=self.transform.x, y=self.transform.y)
         self.explosion_sound.play()
         self.kill()
@@ -98,12 +103,22 @@ class Player(Tank):
         pressed_keys = pg.key.get_pressed()
         if pressed_keys[pg.K_w]:
             self.move((0, -1))
-        if pressed_keys[pg.K_s]:
+        elif pressed_keys[pg.K_s]:
             self.move((0, 1))
-        if pressed_keys[pg.K_a]:
+        elif pressed_keys[pg.K_a]:
             self.move((-1, 0))
-        if pressed_keys[pg.K_d]:
+        elif pressed_keys[pg.K_d]:
             self.move((1, 0))
+
+
+class Enemy(Tank):
+    def __init__(self, board, x=0, y=0):
+        super().__init__(board, GLOBAL.enemy_sprite, x=x, y=y)
+
+    def check_tick(self):
+        if pg.sprite.spritecollideany(self, self.enemy_bullet_group) and not self.is_dead:
+            self.death()
+        self.move((1, 0))
 
 
 class Bullet(GameObject):
@@ -136,5 +151,6 @@ class Bullet(GameObject):
                 pg.sprite.spritecollideany(self, GLOBAL.brick_layout).kill()
             blocks.Boom(self.board, self.transform.x - 0.5,
                         self.transform.y - 0.5)
+            self.disconnect()
             self.kill()
         self.event_on_move()

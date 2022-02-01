@@ -5,24 +5,24 @@ from event_system import Event
 
 
 class UI(pygame.sprite.Sprite):
-    def __init__(self, sprite, *sprite_group, x=0, y=0, center=None):
+    def __init__(self, sprites, *sprite_group, x=0, y=0, center=None, angle=0, size=1):
         super().__init__(GLOBAL.ui_layout, *sprite_group)
-        self.image = sprite
+        self.image = sprites
         self.rect = self.image.get_rect()
         self.center = center
-        self.transform = Transform(x=x, y=y)
+        self.transform = Transform(x=x, y=y, angle=angle, size=size)
+        self.transform.event_change_pos.connect(self.render)
         GLOBAL.event_window_resize.connect(self.render)
-        GLOBAL.event_click.connect(self.click)
+        self.image = pygame.transform.scale(self.image, (self.transform.size * self.image.get_width(),
+                                                         self.transform.size * self.image.get_height()))
+        self.image = pygame.transform.rotate(self.image, self.transform.get_angle())
         self.render()
         self.event_init()
 
     def event_init(self):
         self.on_click = Event()
-        self.on_hover = Event()
-
-    def click(self, pos):
-        if self.rect.collidepoint(pos):
-            self.on_click()
+        self.on_hold = Event()
+        self.on_touch = Event()
 
     def render(self):
         if self.center:
@@ -30,7 +30,8 @@ class UI(pygame.sprite.Sprite):
                 move(GLOBAL.SIZE[0] // 2 - self.image.get_width() // 2 + self.transform.x,
                      GLOBAL.SIZE[1] // 2 - self.image.get_height() // 2 + self.transform.y)
         else:
-            self.rect = self.image.get_rect().move(self.transform.x, self.transform.y)
+            self.rect = self.image.get_rect().move(self.transform.x,
+                                                   self.transform.y)
 
 
 class Transform:
@@ -40,12 +41,14 @@ class Transform:
         self.angle = angle
         self.size = size
         self.event_change_angle = Event()
+        self.event_change_pos = Event()
 
     def get_position(self):
         return self.x, self.y
 
     def set_position(self, x, y):
         self.x, self.y = x, y
+        self.event_change_pos()
 
     def get_angle(self):
         return self.angle
@@ -80,7 +83,7 @@ class GameObject(pygame.sprite.Sprite):
         self.board = board
         s = self.orig_image.get_size()
         self.ratio = s[0] / s[1]
-        GLOBAL.event_tick.connect(self.check_tick, 0)
+        GLOBAL.event_tick.connect(self.check_tick)
         GLOBAL.event_change_size.connect(self.change_sprite_size)
         GLOBAL.event_change_view.connect(self.render)
         GLOBAL.event_tick.connect(self.add_tick)
@@ -88,6 +91,12 @@ class GameObject(pygame.sprite.Sprite):
         self.change_sprite_size()
         self.event_on_move = Event()
         self.event_on_move.connect(self.render)
+
+    def disconnect(self):
+        GLOBAL.event_tick.disconnect(self.check_tick)
+        GLOBAL.event_change_size.disconnect(self.change_sprite_size)
+        GLOBAL.event_change_view.disconnect(self.render)
+        GLOBAL.event_tick.disconnect(self.add_tick)
 
     def change_sprite_size(self):
         """ Меняет размер спрайта """
@@ -148,12 +157,18 @@ class Collide(pygame.sprite.Sprite):
         self.is_collide = False
         self.change_sprite_size()
         self.tank.event_on_move.connect(self.move)
-        GLOBAL.event_tick.connect(self.check_tick, 0)
+        GLOBAL.event_tick.connect(self.check_tick)
         GLOBAL.event_change_size.connect(self.change_sprite_size)
         GLOBAL.event_change_view.connect(self.render)
 
+    def disconnect(self):
+        GLOBAL.event_tick.disconnect(self.check_tick)
+        GLOBAL.event_change_size.disconnect(self.change_sprite_size)
+        GLOBAL.event_change_view.disconnect(self.render)
+
     def check_tick(self):
-        if pygame.sprite.spritecollideany(self, GLOBAL.wall_layout):
+        if pygame.sprite.spritecollideany(self, GLOBAL.wall_layout) or \
+                len(pygame.sprite.spritecollide(self, GLOBAL.collide_layout, dokill=False)) > 1:
             self.is_collide = True
         else:
             self.is_collide = False
