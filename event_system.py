@@ -7,7 +7,7 @@ class Event:
 
     def __call__(self, *args, **kwargs):
         """ Уведомление подписчиков """
-        for ind,  function in enumerate(self.subscribers):
+        for ind, function in enumerate(self.subscribers):
             if function is not None:
                 function(*args, **kwargs)
             else:

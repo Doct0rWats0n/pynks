@@ -81,6 +81,7 @@ class Tank(GameObject):
         for i in self.collides:
             i.disconnect()
             i.kill()
+        self.disconnect()
         blocks.Boom(self.board, x=self.transform.x, y=self.transform.y)
         self.explosion_sound.play()
         self.kill()
@@ -98,6 +99,13 @@ class Player(Tank):
         self.enemy_bullet_group = GLOBAL.enemy_bullet_layout
         self.this_bullet_group = GLOBAL.player_bullet_layout
         GLOBAL.event_defeat.connect(self.death)
+
+    def disconnect(self):
+        GLOBAL.event_tick.disconnect(self.check_tick)
+        GLOBAL.event_change_size.disconnect(self.change_sprite_size)
+        GLOBAL.event_change_view.disconnect(self.render)
+        GLOBAL.event_tick.disconnect(self.add_tick)
+        GLOBAL.event_defeat.disconnect(self.death)
 
     def movement(self):
         pressed_keys = pg.key.get_pressed()
@@ -152,5 +160,6 @@ class Bullet(GameObject):
             blocks.Boom(self.board, self.transform.x - 0.5,
                         self.transform.y - 0.5)
             self.disconnect()
+            GLOBAL.event_tick.disconnect(self.move)
             self.kill()
         self.event_on_move()

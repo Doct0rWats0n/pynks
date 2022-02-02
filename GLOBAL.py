@@ -52,6 +52,10 @@ ice_sprite = LoadData.load_image("water.png")
 wall_sprite = LoadData.load_image("wall.png")
 base_sprite = LoadData.load_image("baseRU.png")
 game_over_sprite = LoadData.load_image('gameover.png')
+win_sprite = LoadData.load_image('win.png')
+next_button_sprite = [LoadData.load_image('next.png'),
+                      LoadData.load_image('next3.png'),
+                      LoadData.load_image('next2.png')]
 barrel_sprite = LoadData.load_sheet("red_barrel_sheet.png", columns=2)
 boom_sprite = LoadData.load_sheet("boom_sheet.png", columns=3)
 
@@ -61,7 +65,10 @@ explosion = LoadData.load_sound("explosion.wav")
 bip = LoadData.load_sound('bip.wav')
 win_sound = LoadData.load_sound('win.wav')
 
+main_font = LoadData.load_font('minecraft.ttf', 50)
+
 event_defeat = Event()
+event_win = Event()
 event_tick = Event()
 event_change_size = Event()
 event_change_view = Event()

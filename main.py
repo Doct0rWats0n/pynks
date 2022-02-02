@@ -1,5 +1,4 @@
 import random
-
 import ui
 from tank_logic import Player, Enemy
 from board import Board
@@ -25,19 +24,28 @@ class App:
         self.is_dead = False
         self.tick = 0
         self.spawn_speed = 100
-        self.max_enemies = 20
+        self.max_enemies = 2
         self.spawned_enemies = 0
         self.killed_enemies = 0
+        self.map = ''
+        self.playing = True
         GLOBAL.event_tick.connect(self.spawn_tanks)
         GLOBAL.event_defeat.connect(self.game_over_screen)
-        GLOBAL.event_kill.connect(lambda: (self.add_killed()))
+        GLOBAL.event_kill.connect(self.add_killed)
+        GLOBAL.event_win.connect(self.win)
 
     def add_killed(self):
         self.killed_enemies += 1
         if self.killed_enemies == self.max_enemies:
-            self.win()
+            GLOBAL.event_win()
+
+    def terminate(self):
+        self.playing = False
 
     def win(self):
+        ui.Image(GLOBAL.win_sprite, GLOBAL.game_ui_layout, center=True, text=f'{self.killed_enemies}')
+        ui.Button(GLOBAL.next_button_sprite, GLOBAL.game_ui_layout, center=True, y=-100, func=lambda: self.terminate(),
+                  scene=self.map)
         GLOBAL.win_sound.play()
 
     def game_over_screen(self):
@@ -72,6 +80,7 @@ class App:
                 GLOBAL.SIZE = self.screen.get_size()
                 GLOBAL.event_window_resize()
             if event.type == pg.MOUSEBUTTONDOWN:
+                GLOBAL.event_hold(event.pos, self.map)
                 if self.is_dead:
                     self.is_dead = False
                     return False
@@ -79,11 +88,13 @@ class App:
                 self.touch_pos = event.pos
                 self.left, self.top = self.board.left, self.board.top
             if event.type == pg.MOUSEMOTION:
+                GLOBAL.event_move(event.pos, self.map)
                 mpos = event.pos
                 if self.is_touch:
                     r = list(map(lambda x, y: y - x, self.touch_pos, mpos))
                     self.board.set_view(self.left + r[0], self.top + r[1])
             if event.type == pg.MOUSEBUTTONUP:
+                GLOBAL.event_click(event.pos, self.map)
                 self.is_touch = False
                 self.touch_pos = event.pos
             if event.type == pg.KEYDOWN:
@@ -109,15 +120,19 @@ class App:
         tank.movement()
         return True
 
-    def run_map(self, map):
+    def run_map(self, mp):
+        self.map = mp
         self.tick = 0
         self.spawned_enemies = 0
         self.killed_enemies = 0
-        self.spawn_points, (x, y) = LoadData.load_level(self.board, map)
+        self.spawn_points, (x, y) = LoadData.load_level(self.board, mp)
         tank = Player(self.board, x=x, y=y)
+        self.playing = True
         playing = True
         while playing:
             playing = self.movement(tank)
+            if not self.playing:
+                playing = False
             self.draw_layouts()
             GLOBAL.event_tick()
             pg.display.flip()
@@ -145,11 +160,11 @@ class App:
                 if event.type == pg.QUIT:
                     running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    GLOBAL.event_hold(event.pos)
+                    GLOBAL.event_hold(event.pos, 'main')
                 if event.type == pg.MOUSEBUTTONUP:
-                    GLOBAL.event_click(event.pos)
+                    GLOBAL.event_click(event.pos, 'main')
                 if event.type == pg.MOUSEMOTION:
-                    GLOBAL.event_move(event.pos)
+                    GLOBAL.event_move(event.pos, 'main')
                 if event.type == pg.WINDOWRESIZED:
                     GLOBAL.SIZE = self.screen.get_size()
                     GLOBAL.event_window_resize()

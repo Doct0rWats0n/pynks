@@ -68,3 +68,10 @@ class LoadData:
         if not os.path.isfile(full_name):
             raise FileNotFoundError(f"Sound '{full_name}' not found")
         return pg.mixer.Sound(full_name)
+
+    @staticmethod
+    def load_font(file_name, size=30):
+        full_name = os.path.join('data/font', file_name)
+        if not os.path.isfile(full_name):
+            raise FileNotFoundError(f"Font '{full_name}' not found")
+        return pygame.font.Font(full_name, size)
