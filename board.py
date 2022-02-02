@@ -6,7 +6,6 @@ import GLOBAL
 class Board:
     def __init__(self, width: int, height: int):
         self.width, self.height = width, height
-        self.board = [[0] * width for _ in range(height)]
         self.left, self.top = 10, 10
         self.cell_size = 30
 
