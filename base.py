@@ -17,6 +17,7 @@ class UI(pygame.sprite.Sprite):
                                                          self.transform.size * self.image.get_height()))
         self.image = pygame.transform.rotate(self.image, self.transform.get_angle())
         self.render()
+        self.scene = 'main'
         self.event_init()
 
     def event_init(self):
@@ -149,13 +150,14 @@ class Collide(pygame.sprite.Sprite):
         super().__init__(GLOBAL.collide_layout)
         self.tank = tank
         self.const_pos = xy1
-        self.transform = Transform(xy1[0] + self.tank.transform.x,
-                                   xy1[1] + self.tank.transform.y)
+        self.transform = Transform(xy1[0] + self.tank.transform.x, xy1[1] + self.tank.transform.y)
         self.size = xy2
+
         self.orig_image = GLOBAL.collide_sprite
         self.image = GLOBAL.collide_sprite
         self.is_collide = False
         self.change_sprite_size()
+
         self.tank.event_on_move.connect(self.move)
         GLOBAL.event_tick.connect(self.check_tick)
         GLOBAL.event_change_size.connect(self.change_sprite_size)

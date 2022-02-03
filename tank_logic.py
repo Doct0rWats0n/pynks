@@ -18,11 +18,10 @@ class Tank(GameObject):
         self.bullet_speed = bullet_speed
         self.bullet_sprite = bullet_sprite
         self.bullet_power = bullet_power
-        self.shoot_sound = GLOBAL.hit_sound
-        self.explosion_sound = GLOBAL.explosion
         self.enemy_bullet_group = GLOBAL.player_bullet_layout
         self.this_bullet_group = GLOBAL.enemy_bullet_layout
         self.is_dead = False
+        self.is_took_bonus = False
         self.collide_up = Collide(self, (0.15, 0.05), (0.7, 0.1))
         self.collide_down = Collide(self, (0.15, 0.85), (0.7, 0.1))
         self.collide_left = Collide(self, (0.05, 0.15), (0.1, 0.7))
@@ -43,6 +42,13 @@ class Tank(GameObject):
     def check_tick(self):
         if pg.sprite.spritecollideany(self, self.enemy_bullet_group) and not self.is_dead:
             self.death()
+        if pg.sprite.spritecollideany(self, GLOBAL.bonus_layout) and not self.is_took_bonus:
+            pg.sprite.spritecollideany(self, GLOBAL.bonus_layout).kill()
+            self.activate_bonus()
+
+    def activate_bonus(self):
+        self.is_took_bonus = True
+        self.speed = 0.12
 
     def add_tick(self):
         self.cur_tick += 1 if self.cur_tick < self.reload_speed else 0
@@ -51,7 +57,7 @@ class Tank(GameObject):
         """ Обработка выстрела """
         if self.cur_tick == self.reload_speed:
             self.cur_tick = 0
-            self.shoot_sound.play()
+            GLOBAL.hit_sound.play()
             if self.transform.angle == 360:
                 pos = [self.transform.size / 2 - 0.1, -0.2]
             elif self.transform.angle == 180:
@@ -82,8 +88,9 @@ class Tank(GameObject):
         for i in self.collides:
             i.disconnect()
             i.kill()
+        self.disconnect()
         blocks.Boom(self.board, x=self.transform.x, y=self.transform.y)
-        self.explosion_sound.play()
+        GLOBAL.explosion.play()
         self.kill()
 
     def taking_damage(self, damage):
@@ -98,7 +105,15 @@ class Player(Tank):
         super().__init__(board, GLOBAL.player_sprite, x=x, y=y, angle=angle)
         self.enemy_bullet_group = GLOBAL.enemy_bullet_layout
         self.this_bullet_group = GLOBAL.player_bullet_layout
+        self.reload_speed = 30
         GLOBAL.event_defeat.connect(self.death)
+
+    def disconnect(self):
+        GLOBAL.event_tick.disconnect(self.check_tick)
+        GLOBAL.event_change_size.disconnect(self.change_sprite_size)
+        GLOBAL.event_change_view.disconnect(self.render)
+        GLOBAL.event_tick.disconnect(self.add_tick)
+        GLOBAL.event_defeat.disconnect(self.death)
 
     def movement(self):
         pressed_keys = pg.key.get_pressed()
@@ -147,7 +162,6 @@ class Bullet(GameObject):
         self.transform.size = 0.4
         self.speed = speed
         self.power = power
-        self.shoot = GLOBAL.shoot_sound
         self.change_sprite_size()
         GLOBAL.event_tick.connect(self.move)
         self.is_boomed = False
@@ -166,11 +180,12 @@ class Bullet(GameObject):
         self.transform.y += self.speed * self.vec[1]
         if pg.sprite.spritecollideany(self, GLOBAL.wall_layout) and not self.is_boomed:
             self.is_boomed = True
-            self.shoot.play()
+            GLOBAL.shoot_sound.play()
             if pg.sprite.spritecollideany(self, GLOBAL.brick_layout):
                 pg.sprite.spritecollideany(self, GLOBAL.brick_layout).kill()
             blocks.Boom(self.board, self.transform.x - 0.5,
                         self.transform.y - 0.5)
             self.disconnect()
+            GLOBAL.event_tick.disconnect(self.move)
             self.kill()
         self.event_on_move()

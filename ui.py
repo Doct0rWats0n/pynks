@@ -3,10 +3,11 @@ from base import UI
 
 
 class Button(UI):
-    def __init__(self, sprites, *sprite_group, x=0, y=0, center=None, func=None, angle=0, size=1):
+    def __init__(self, sprites, *sprite_group, x=0, y=0, center=None, func=None, angle=0, size=1, scene='main'):
         super().__init__(sprites[0], *sprite_group, x=x, y=y, center=center, angle=angle, size=size)
         if func is not None:
             self.on_click.connect(func)
+        self.scene = scene
         self.main_image = sprites[0]
         self.on_hold_image = sprites[1]
         self.on_touch_image = sprites[2]
@@ -14,36 +15,25 @@ class Button(UI):
         GLOBAL.event_hold.connect(self.hold)
         GLOBAL.event_move.connect(self.touch)
 
-    def click(self, pos):
-        if self.rect.collidepoint(pos):
+    def click(self, pos, scene):
+        if self.rect.collidepoint(pos) and scene == self.scene:
             self.image = self.on_touch_image
             GLOBAL.bip.play()
             self.on_click()
 
-    def hold(self, pos):
-        if self.rect.collidepoint(pos):
+    def hold(self, pos, scene):
+        if self.rect.collidepoint(pos) and scene == self.scene:
             self.image = self.on_hold_image
             self.on_hold()
 
-    def touch(self, pos):
-        if self.rect.collidepoint(pos):
+    def touch(self, pos, scene):
+        if self.rect.collidepoint(pos) and scene == self.scene:
             self.image = self.on_touch_image
             self.on_touch()
-        else:
-            if self.image == self.on_touch_image:
-                self.image = self.main_image
+        elif self.image == self.on_touch_image and scene == self.scene:
+            self.image = self.main_image
 
 
 class Image(UI):
     def __init__(self, sprite, *sprite_group, x=0, y=0, center=None, angle=0, size=1):
         super().__init__(sprite, *sprite_group, x=x, y=y, center=center, angle=angle,size=size)
-
-
-class Background(UI):
-    def __init__(self, sprite, *sprite_group, x=0, y=0, center=None, angle=0, size=1):
-        pass
-
-
-class Text(UI):
-    def __init__(self, sprite, *sprite_group, x=0, y=0, center=None, angle=0, fontname=None, fontsize=16, size=1):
-        super().__init__(sprite, *sprite_group, x=x, y=y, center=center, angle=angle, size=size)

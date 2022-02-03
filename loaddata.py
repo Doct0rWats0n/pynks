@@ -4,7 +4,8 @@ import pygame.image
 import blocks
 import GLOBAL
 from PIL import Image
-pg.init()
+pg.mixer.init()
+pg.font.init()
 
 
 class LoadData:
@@ -42,7 +43,6 @@ class LoadData:
             raise FileNotFoundError(f"Map '{full_name}' not found")
         with open(full_name, mode='r') as file:
             last_map = list(map(str.strip, file.readlines()))
-        print(f'Длина этой залупы = {len(last_map)}')
         last_x = last_y = None
         for index, row in enumerate(last_map):
             if 'X' in row:
@@ -65,6 +65,8 @@ class LoadData:
                     blocks.RedBarrel(board, x=ind_x, y=ind_y)
                 elif block == 'T':
                     spwn_points.append([ind_x, ind_y])
+                elif block == 'I':
+                    blocks.Bonus(board, x=ind_x, y=ind_y)
                 elif block == 'P':
                     spwm_pl = ind_x, ind_y
         return spwn_points, spwm_pl, last_x, last_y, last_map
@@ -75,3 +77,10 @@ class LoadData:
         if not os.path.isfile(full_name):
             raise FileNotFoundError(f"Sound '{full_name}' not found")
         return pg.mixer.Sound(full_name)
+
+    @staticmethod
+    def load_font(file_name, size=30):
+        full_name = os.path.join('data/font', file_name)
+        if not os.path.isfile(full_name):
+            raise FileNotFoundError(f"Font '{full_name}' not found")
+        return pygame.font.Font(full_name, size)
