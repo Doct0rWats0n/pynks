@@ -3,7 +3,8 @@ import pygame as pg
 import pygame.image
 import blocks
 from PIL import Image
-pg.init()
+pg.mixer.init()
+pg.font.init()
 
 
 class LoadData:
@@ -40,8 +41,8 @@ class LoadData:
         if not os.path.isfile(full_name):
             raise FileNotFoundError(f"Map '{full_name}' not found")
         with open(full_name, mode='r') as file:
-            map = [[j for j in i] for i in file.readlines()]
-        for ind_y, data in enumerate(map):
+            mp = [[j for j in i] for i in file.readlines()]
+        for ind_y, data in enumerate(mp):
             for ind_x, block in enumerate(data):
                 if block == '#':
                     blocks.IndestructibleWall(board, x=ind_x, y=ind_y)
@@ -57,10 +58,11 @@ class LoadData:
                     blocks.RedBarrel(board, x=ind_x, y=ind_y)
                 elif block == 'T':
                     spwn_points.append([ind_x, ind_y])
+                elif block == 'I':
+                    blocks.Bonus(board, x=ind_x, y=ind_y)
                 elif block == 'P':
                     spwm_pl = ind_x, ind_y
         return spwn_points, spwm_pl
-
 
     @staticmethod
     def load_sound(file_name):

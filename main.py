@@ -23,12 +23,13 @@ class App:
         self.top = 0
         self.is_dead = False
         self.tick = 0
-        self.spawn_speed = 100
-        self.max_enemies = 2
+        self.spawn_speed = 10
+        self.max_enemies = 10
         self.spawned_enemies = 0
         self.killed_enemies = 0
         self.map = ''
         self.playing = True
+        self.full_screen = False
         GLOBAL.event_tick.connect(self.spawn_tanks)
         GLOBAL.event_defeat.connect(self.game_over_screen)
         GLOBAL.event_kill.connect(self.add_killed)
@@ -65,7 +66,6 @@ class App:
         GLOBAL.tank_layout.draw(self.screen)
         GLOBAL.bullet_layout.draw(self.screen)
         GLOBAL.block_layout.draw(self.screen)
-        GLOBAL.collide_layout.draw(self.screen)
         GLOBAL.game_ui_layout.draw(self.screen)
 
     def clear_groups(self):
@@ -112,8 +112,8 @@ class App:
                     self.board.set_size(self.board.get_size() - 10)
                 if event.key == pg.K_q:
                     self.board.set_view(
-                        -tank.transform.x * self.board.cell_size + GLOBAL.WIDTH // 2 - self.board.cell_size // 2,
-                        -tank.transform.y * self.board.cell_size + GLOBAL.HEIGHT // 2 - self.board.cell_size // 2)
+                        -tank.transform.x * self.board.cell_size + GLOBAL.SIZE[0] // 2 - self.board.cell_size // 2,
+                        -tank.transform.y * self.board.cell_size + GLOBAL.SIZE[1] // 2 - self.board.cell_size // 2)
         pressed_keys = pg.key.get_pressed()
         if pressed_keys[pg.K_m]:
             tank.shot()
@@ -140,9 +140,18 @@ class App:
             pg.display.set_caption(f'{self.clock.get_fps()}')
         self.clear_groups()
 
+    def on_off_full(self):
+        self.full_screen = not self.full_screen
+        if not self.full_screen:
+            self.screen = pg.display.set_mode(GLOBAL.SMALL_SIZE, pg.RESIZABLE)
+            GLOBAL.SIZE = GLOBAL.SMALL_SIZE
+            GLOBAL.event_window_resize()
+        else:
+            self.screen = pg.display.set_mode((0, 0), pg.FULLSCREEN | pg.RESIZABLE)
+            GLOBAL.SIZE = self.screen.get_size()
+            GLOBAL.event_window_resize()
+
     def run_menu(self):
-        def run_settings():
-            pass
         tank = ui.Image(GLOBAL.player_sprite, GLOBAL.menu_ui_layout, x=100, y=-100, center=True, angle=90, size=3)
         but1 = ui.Button([GLOBAL.indestructible_wall_sprite,
                           GLOBAL.wall_sprite,
@@ -152,7 +161,9 @@ class App:
         but2 = ui.Button([GLOBAL.indestructible_wall_sprite,
                           GLOBAL.wall_sprite,
                           GLOBAL.ice_sprite], GLOBAL.menu_ui_layout,
-                         x=0, y=0, center=True, func=lambda: self.run_map("map2.txt"))
+                         x=0, y=0, center=True, func=lambda: self.run_map("map3.txt"))
+        but3 = ui.Button(GLOBAL.sound_button_sprite, GLOBAL.menu_ui_layout,
+                         x=0, y=100, center=True, func=lambda: self.on_off_full())
         but2.on_touch.connect(lambda: tank.transform.set_position(100, 0))
         running = True
         while running:

@@ -66,9 +66,14 @@ class RedBarrel(AnimatedBlock):
             self.kill()
 
 
+class Bonus(AnimatedBlock):
+    def __init__(self, board, x=0, y=0):
+        super().__init__(board, GLOBAL.bonus_speed_sprite, GLOBAL.bonus_layout, x=x, y=y, animation_speed=20)
+
+
 class Boom(AnimatedBlock):
     def __init__(self, board, x=0, y=0):
-        super().__init__(board, GLOBAL.boom_sprite, x=x, y=y, animation_speed=10)
+        super().__init__(board, GLOBAL.boom_sprite, x=x, y=y, animation_speed=5)
         self.is_gone = False
 
     def check_tick(self):
