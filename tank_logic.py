@@ -1,8 +1,10 @@
+from typing import Tuple
 from board import Board
 import GLOBAL
 from base import GameObject, Collide
 import pygame as pg
 import blocks
+import way_finder
 
 
 class Tank(GameObject):
@@ -45,7 +47,6 @@ class Tank(GameObject):
     def add_tick(self):
         self.cur_tick += 1 if self.cur_tick < self.reload_speed else 0
 
-    @live
     def shot(self):
         """ Обработка выстрела """
         if self.cur_tick == self.reload_speed:
@@ -64,7 +65,7 @@ class Tank(GameObject):
                    y=self.transform.y + pos[1],
                    angle=self.transform.get_angle(), bullet_group=self.this_bullet_group)
 
-    def move(self, vector: tuple[int, int]):
+    def move(self, vector: Tuple[int, int]):
         """ Обработка перемещения """
         if (not self.collide_up.is_collide and vector == (0, -1)) or \
                 (not self.collide_down.is_collide and vector == (0, 1)):
@@ -112,13 +113,32 @@ class Player(Tank):
 
 
 class Enemy(Tank):
-    def __init__(self, board, x=0, y=0):
+    def __init__(self, board, last_x, last_y, last_map, x=0, y=0):
         super().__init__(board, GLOBAL.enemy_sprite, x=x, y=y)
+        self.way = way_finder.get_way(y, x, last_x, last_y, last_map)
+        self.cur_move = self.way.pop()[::-1]
+        self.t_x, self.t_y = x + self.cur_move[0], y + self.cur_move[1]
 
     def check_tick(self):
         if pg.sprite.spritecollideany(self, self.enemy_bullet_group) and not self.is_dead:
             self.death()
-        self.move((1, 0))
+        if int(self.transform.x) == self.t_x and int(self.transform.y) == self.t_y:
+            if self.way:
+                self.cur_move = self.way.pop()[::-1]
+                if self.cur_move[0] == 1:
+                    print("HELOHEOHLEH")
+                    self.transform.set_angle(270)
+                elif self.cur_move[0] == -1:
+                    self.transform.set_angle(90)
+                elif self.cur_move[1] == 1:
+                    self.transform.set_angle(180)
+                elif self.cur_move[1] == -1:
+                    self.transform.set_angle(0)
+                self.t_x, self.t_y = self.t_x + self.cur_move[0], self.t_y + self.cur_move[1]
+            else:
+                self.cur_move = (0, 0)
+        self.shot()
+        self.move(self.cur_move)
 
 
 class Bullet(GameObject):

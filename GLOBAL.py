@@ -73,6 +73,7 @@ event_kill = Event()
 
 MIN_CELL_SIZE = 10
 MAX_CELL_SIZE = 100
+OPEN_CELLS = ['.', '"', 'B', 'T', 'X', '~']
 
 im = Image.new(mode='1', size=(1, 1))
 collide_sprite = pygame.image.fromstring(im.tobytes(), im.size, 'P')

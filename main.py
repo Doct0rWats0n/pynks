@@ -48,7 +48,7 @@ class App:
         self.tick = (self.tick + 1) % self.spawn_speed
         if self.tick == 0 and self.spawned_enemies < self.max_enemies:
             spwn = random.choice(self.spawn_points)
-            Enemy(self.board, x=spwn[0], y=spwn[1])
+            Enemy(self.board, self.last_x, self.last_y, self.last_map, x=spwn[0], y=spwn[1])
             self.spawned_enemies += 1
 
     def draw_layouts(self):
@@ -113,7 +113,7 @@ class App:
         self.tick = 0
         self.spawned_enemies = 0
         self.killed_enemies = 0
-        self.spawn_points, (x, y) = LoadData.load_level(self.board, map)
+        self.spawn_points, (x, y), self.last_x, self.last_y, self.last_map = LoadData.load_level(self.board, map)
         tank = Player(self.board, x=x, y=y)
         playing = True
         while playing:
@@ -126,8 +126,9 @@ class App:
         self.clear_groups()
 
     def run_menu(self):
-        def run_settings():
-            pass
+        def close_menu():
+            self.running = False
+
         tank = ui.Image(GLOBAL.player_sprite, GLOBAL.menu_ui_layout, x=100, y=-100, center=True, angle=90, size=3)
         but1 = ui.Button([GLOBAL.indestructible_wall_sprite,
                           GLOBAL.wall_sprite,
@@ -139,11 +140,16 @@ class App:
                           GLOBAL.ice_sprite], GLOBAL.menu_ui_layout,
                          x=0, y=0, center=True, func=lambda: self.run_map("map2.txt"))
         but2.on_touch.connect(lambda: tank.transform.set_position(100, 0))
-        running = True
-        while running:
+        but3 = ui.Button([GLOBAL.indestructible_wall_sprite,
+                          GLOBAL.wall_sprite,
+                          GLOBAL.ice_sprite], GLOBAL.menu_ui_layout,
+                         x=0, y=100, center=True, func=close_menu)
+        but3.on_touch.connect(lambda: tank.transform.set_position(100, 100))
+        self.running = True
+        while self.running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    running = False
+                    self.running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     GLOBAL.event_hold(event.pos)
                 if event.type == pg.MOUSEBUTTONUP:

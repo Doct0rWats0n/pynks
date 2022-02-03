@@ -2,6 +2,7 @@ import os
 import pygame as pg
 import pygame.image
 import blocks
+import GLOBAL
 from PIL import Image
 pg.init()
 
@@ -40,8 +41,15 @@ class LoadData:
         if not os.path.isfile(full_name):
             raise FileNotFoundError(f"Map '{full_name}' not found")
         with open(full_name, mode='r') as file:
-            map = [[j for j in i] for i in file.readlines()]
-        for ind_y, data in enumerate(map):
+            last_map = list(map(str.strip, file.readlines()))
+        print(f'Длина этой залупы = {len(last_map)}')
+        last_x = last_y = None
+        for index, row in enumerate(last_map):
+            if 'X' in row:
+                last_x, last_y = index, row.index('X')
+                break
+        mp = [[j for j in i] for i in last_map]
+        for ind_y, data in enumerate(mp):
             for ind_x, block in enumerate(data):
                 if block == '#':
                     blocks.IndestructibleWall(board, x=ind_x, y=ind_y)
@@ -59,8 +67,7 @@ class LoadData:
                     spwn_points.append([ind_x, ind_y])
                 elif block == 'P':
                     spwm_pl = ind_x, ind_y
-        return spwn_points, spwm_pl
-
+        return spwn_points, spwm_pl, last_x, last_y, last_map
 
     @staticmethod
     def load_sound(file_name):
