@@ -1,7 +1,5 @@
 from pygame.sprite import Group
 import pygame
-
-import loaddata
 from loaddata import LoadData
 from event_system import Event
 from PIL import Image

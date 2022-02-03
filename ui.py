@@ -35,5 +35,10 @@ class Button(UI):
 
 
 class Image(UI):
-    def __init__(self, sprite, *sprite_group, x=0, y=0, center=None, angle=0, size=1):
-        super().__init__(sprite, *sprite_group, x=x, y=y, center=center, angle=angle,size=size)
+    def __init__(self, sprite, *sprite_group, x=0, y=0, center=None, angle=0, size=1, text=''):
+        super().__init__(sprite, *sprite_group, x=x, y=y, center=center, angle=angle, size=size)
+        t = GLOBAL.main_font.render(text, True, (100, 255, 100))
+        x = self.image.get_width() // 2 - t.get_width() // 2
+        y = self.image.get_height() // 2 - t.get_height() // 2
+        self.image.blit(t, (x, y))
+        self.render()

@@ -171,6 +171,7 @@ class App:
                           GLOBAL.ice_sprite], GLOBAL.menu_ui_layout,
                          x=0, y=100, center=True, func=close_menu)
         but3.on_touch.connect(lambda: tank.transform.set_position(100, 100))
+        ui.Button(GLOBAL.sound_button_sprite, GLOBAL.menu_ui_layout, x=0, y=200, center=True, func=self.on_off_full)
         self.running = True
         while self.running:
             for event in pg.event.get():
