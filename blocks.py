@@ -47,6 +47,7 @@ class Base(Block):
         if pg.sprite.spritecollideany(self, GLOBAL.bullet_layout) and not self.is_defeat:
             self.is_defeat = True
             GLOBAL.event_defeat()
+            self.disconnect()
             self.kill()
 
 
@@ -65,13 +66,19 @@ class RedBarrel(AnimatedBlock):
             self.kill()
 
 
+class Bonus(AnimatedBlock):
+    def __init__(self, board, x=0, y=0):
+        super().__init__(board, GLOBAL.bonus_speed_sprite, GLOBAL.bonus_layout, x=x, y=y, animation_speed=20)
+
+
 class Boom(AnimatedBlock):
     def __init__(self, board, x=0, y=0):
-        super().__init__(board, GLOBAL.boom_sprite, x=x, y=y, animation_speed=10)
+        super().__init__(board, GLOBAL.boom_sprite, x=x, y=y, animation_speed=5)
         self.is_gone = False
 
     def check_tick(self):
         if self.is_gone and self.cur_frame == 0:
             self.kill()
+            self.disconnect()
         if self.cur_frame == len(self.frames) - 1:
             self.is_gone = True
