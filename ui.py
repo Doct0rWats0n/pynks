@@ -37,3 +37,13 @@ class Button(UI):
 class Image(UI):
     def __init__(self, sprite, *sprite_group, x=0, y=0, center=None, angle=0, size=1):
         super().__init__(sprite, *sprite_group, x=x, y=y, center=center, angle=angle,size=size)
+
+
+class Background(UI):
+    def __init__(self, sprite, *sprite_group, x=0, y=0, center=None, angle=0, size=1):
+        pass
+
+
+class Text(UI):
+    def __init__(self, sprite, *sprite_group, x=0, y=0, center=None, angle=0, fontname=None, fontsize=16, size=1):
+        super().__init__(sprite, *sprite_group, x=x, y=y, center=center, angle=angle, size=size)

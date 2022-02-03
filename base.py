@@ -100,8 +100,8 @@ class GameObject(pygame.sprite.Sprite):
 
     def change_sprite_size(self):
         """ Меняет размер спрайта """
-        self.image = pygame.transform.scale(self.orig_image, (self.board.cell_size * self.transform.size * self.ratio,
-                                                              self.board.cell_size * self.transform.size))
+        self.image = pygame.transform.scale(self.orig_image, (int(self.board.cell_size * self.transform.size * self.ratio),
+                                                              int(self.board.cell_size * self.transform.size)))
         rotated_image = pygame.transform.rotate(self.image, self.transform.get_angle())
         self.image = rotated_image
         self.render()
@@ -131,11 +131,11 @@ class AnimatedGameObject(GameObject):
 
     def render(self):
         self.image = pygame.transform.scale(self.frames[self.cur_frame],
-                                            (self.board.cell_size * self.transform.size * self.ratio,
-                                             self.board.cell_size * self.transform.size))
+                                            (int(self.board.cell_size * self.transform.size * self.ratio),
+                                             int(self.board.cell_size * self.transform.size)))
         self.rect = self.image.get_rect().move(
-            (self.board.cell_size * self.transform.x + self.board.left),
-            (self.board.cell_size * self.transform.y + self.board.top))
+            (int(self.board.cell_size * self.transform.x + self.board.left)),
+            (int(self.board.cell_size * self.transform.y + self.board.top)))
 
     def add_tick(self):
         self.cur_tick = (self.cur_tick + 1) % self.animation_speed
@@ -179,11 +179,11 @@ class Collide(pygame.sprite.Sprite):
         self.render()
 
     def change_sprite_size(self):
-        self.image = pygame.transform.scale(self.orig_image, (self.size[0] * self.tank.board.cell_size,
-                                                              self.size[1] * self.tank.board.cell_size))
+        self.image = pygame.transform.scale(self.orig_image, (int(self.size[0] * self.tank.board.cell_size),
+                                                              int(self.size[1] * self.tank.board.cell_size)))
         self.render()
 
     def render(self):
         self.rect = self.image.get_rect().move(
-            (self.tank.board.cell_size * self.transform.x + self.tank.board.left),
-            (self.tank.board.cell_size * self.transform.y + self.tank.board.top))
+            (int(self.tank.board.cell_size * self.transform.x + self.tank.board.left)),
+            (int(self.tank.board.cell_size * self.transform.y + self.tank.board.top)))
