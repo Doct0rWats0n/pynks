@@ -55,7 +55,6 @@ class Level:
             self.board.event_tick()
             pg.display.flip()
             self.clock.tick(self.FPS)
-            pg.display.set_caption(f'{self.clock.get_fps()}')
         self.clear_groups()
 
     def add_killed(self):
@@ -164,7 +163,7 @@ class App:
     def run_menu(self):
         def close_menu():
             self.running = False
-
+        pg.display.set_caption('pynks')
         tank = ui.Image(GLOBAL.player_sprite, GLOBAL.menu_ui_layout, x=100, y=-100, center=True, angle=90, size=3)
         but1 = ui.Button(GLOBAL.start_sprite, GLOBAL.menu_ui_layout,
                          x=0, y=-100, center=True, func=lambda: self.start_level("map1.txt"))
@@ -196,7 +195,6 @@ class App:
             GLOBAL.menu_ui_layout.draw(self.screen)
             pg.display.flip()
             self.clock.tick(self.FPS)
-            pg.display.set_caption(f'{self.clock.get_fps()}')
         pg.quit()
 
 
