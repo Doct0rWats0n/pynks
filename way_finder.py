@@ -5,13 +5,13 @@ cache = {}
 
 def get_way(x, y, tar_x, tar_y, map, z_map=None, curpoint=1):
     if map is None:
-        raise ValueError('Emply map value')
+        raise ValueError('Empty map value')
     elif tar_x is None or tar_y is None:
-        raise ValueError('Emply target coords value')
+        raise ValueError('Empty target coords value')
     if (x, y, tar_x, tar_y) in cache:
         return cache[(x, y, tar_x, tar_y)]
     if z_map is None:
-        print(map)
+        #print(map)
         z_map = [[0] * len(map[0]) for _ in range(len(map))]
         z_map[x][y] = 1
     for i in range(len(map)):
@@ -27,10 +27,10 @@ def get_way(x, y, tar_x, tar_y, map, z_map=None, curpoint=1):
                     z_map[i][j + 1] = curpoint + 1
     if z_map[tar_x][tar_y] == 0:
         curpoint += 1
-        pprint(z_map)
+        #pprint(z_map)
         return get_way(x, y, tar_x, tar_y, map, z_map, curpoint)
 
-    print(curpoint)
+    #print(curpoint)
     way = []
     curpoint = z_map[tar_x][tar_y]
     while curpoint > 1:

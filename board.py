@@ -8,17 +8,23 @@ class Board:
         self.width, self.height = width, height
         self.left, self.top = 10, 10
         self.cell_size = 30
+        self.event_tick = Event()
+        self.event_change_size = Event()
+        self.event_change_view = Event()
+        self.event_defeat = Event()
+        self.event_kill = Event()
+        self.event_win = Event()
 
     def set_view(self, left: int, top: int):
         """ Изменение положения игрового поля """
         self.left, self.top = left, top
-        GLOBAL.event_change_view()
+        self.event_change_view()
 
     def set_size(self, cell_size: int):
         """ Изменение размера игровой клетки """
         if GLOBAL.MIN_CELL_SIZE <= cell_size <= GLOBAL.MAX_CELL_SIZE:
             self.cell_size = cell_size
-            GLOBAL.event_change_size()
+            self.event_change_size()
 
     def get_size(self):
         """ Получение размера клетки поля """

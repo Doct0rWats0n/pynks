@@ -84,20 +84,20 @@ class GameObject(pygame.sprite.Sprite):
         self.board = board
         s = self.orig_image.get_size()
         self.ratio = s[0] / s[1]
-        GLOBAL.event_tick.connect(self.check_tick)
-        GLOBAL.event_change_size.connect(self.change_sprite_size)
-        GLOBAL.event_change_view.connect(self.render)
-        GLOBAL.event_tick.connect(self.add_tick)
+        self.board.event_tick.connect(self.check_tick)
+        self.board.event_change_size.connect(self.change_sprite_size)
+        self.board.event_change_view.connect(self.render)
+        self.board.event_tick.connect(self.add_tick)
         self.transform.set_angle(angle)
         self.change_sprite_size()
         self.event_on_move = Event()
         self.event_on_move.connect(self.render)
 
     def disconnect(self):
-        GLOBAL.event_tick.disconnect(self.check_tick)
-        GLOBAL.event_change_size.disconnect(self.change_sprite_size)
-        GLOBAL.event_change_view.disconnect(self.render)
-        GLOBAL.event_tick.disconnect(self.add_tick)
+        self.board.event_tick.disconnect(self.check_tick)
+        self.board.event_change_size.disconnect(self.change_sprite_size)
+        self.board.event_change_view.disconnect(self.render)
+        self.board.event_tick.disconnect(self.add_tick)
 
     def change_sprite_size(self):
         """ Меняет размер спрайта """
@@ -159,14 +159,14 @@ class Collide(pygame.sprite.Sprite):
         self.change_sprite_size()
 
         self.tank.event_on_move.connect(self.move)
-        GLOBAL.event_tick.connect(self.check_tick)
-        GLOBAL.event_change_size.connect(self.change_sprite_size)
-        GLOBAL.event_change_view.connect(self.render)
+        self.tank.board.event_tick.connect(self.check_tick)
+        self.tank.board.event_change_size.connect(self.change_sprite_size)
+        self.tank.board.event_change_view.connect(self.render)
 
     def disconnect(self):
-        GLOBAL.event_tick.disconnect(self.check_tick)
-        GLOBAL.event_change_size.disconnect(self.change_sprite_size)
-        GLOBAL.event_change_view.disconnect(self.render)
+        self.tank.board.event_tick.disconnect(self.check_tick)
+        self.tank.board.event_change_size.disconnect(self.change_sprite_size)
+        self.tank.board.event_change_view.disconnect(self.render)
 
     def check_tick(self):
         if pygame.sprite.spritecollideany(self, GLOBAL.wall_layout) or \

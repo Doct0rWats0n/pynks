@@ -9,56 +9,29 @@ from loaddata import LoadData
 pg.init()
 
 
-class App:
-    def __init__(self):
-        self.screen = pg.display.set_mode(GLOBAL.SIZE, pg.RESIZABLE)
-        self.clock = pg.time.Clock()
-        self.FPS = 60
+class Level:
+    def __init__(self, screen, clock, FPS, mp, max_enemies):
         self.board = Board(0, 0)
         self.board.set_view(0, 0)
         self.board.set_size(40)
         self.is_touch = False
-        self.touch_pos = (0, 0)
         self.left = 0
         self.top = 0
-        self.is_dead = False
+        self.touch_pos = (0, 0)
+        self.screen = screen
+        self.FPS = FPS
+        self.clock = clock
+        self.map = mp
         self.tick = 0
-        self.spawn_speed = 10
-        self.max_enemies = 10
         self.spawned_enemies = 0
         self.killed_enemies = 0
-        self.map = ''
-        self.playing = True
-        self.full_screen = False
-        GLOBAL.event_tick.connect(self.spawn_tanks)
-        GLOBAL.event_defeat.connect(self.game_over_screen)
-        GLOBAL.event_kill.connect(self.add_killed)
-        GLOBAL.event_win.connect(self.win)
-
-    def add_killed(self):
-        self.killed_enemies += 1
-        if self.killed_enemies == self.max_enemies:
-            GLOBAL.event_win()
-
-    def terminate(self):
-        self.playing = False
-
-    def win(self):
-        ui.Image(GLOBAL.win_sprite, GLOBAL.game_ui_layout, center=True, text=f'{self.killed_enemies}')
-        ui.Button(GLOBAL.next_button_sprite, GLOBAL.game_ui_layout, center=True, y=-100, func=lambda: self.terminate(),
-                  scene=self.map)
-        GLOBAL.win_sound.play()
-
-    def game_over_screen(self):
-        ui.Image(GLOBAL.game_over_sprite, GLOBAL.game_ui_layout, center=True)
-        self.is_dead = True
-
-    def spawn_tanks(self):
-        self.tick = (self.tick + 1) % self.spawn_speed
-        if self.tick == 0 and self.spawned_enemies < self.max_enemies:
-            spwn = random.choice(self.spawn_points)
-            Enemy(self.board, self.last_x, self.last_y, self.last_map, x=spwn[0], y=spwn[1])
-            self.spawned_enemies += 1
+        self.max_enemies = max_enemies
+        self.spawn_speed = 50
+        self.is_dead = False
+        self.board.event_tick.connect(self.spawn_tanks)
+        self.board.event_defeat.connect(self.game_over_screen)
+        self.board.event_kill.connect(self.add_killed)
+        self.board.event_win.connect(self.win)
 
     def draw_layouts(self):
         self.screen.fill("black")
@@ -68,9 +41,52 @@ class App:
         GLOBAL.block_layout.draw(self.screen)
         GLOBAL.game_ui_layout.draw(self.screen)
 
+    def run_map(self):
+        self.spawn_points, (x, y), self.last_x, self.last_y, self.last_map = LoadData.load_level(self.board, self.map)
+        tank = Player(self.board, x=x, y=y)
+        self.playing = True
+        playing = True
+        while playing:
+            playing = self.movement(tank)
+            if not self.playing:
+                playing = False
+                tank.death()
+            self.draw_layouts()
+            self.board.event_tick()
+            pg.display.flip()
+            self.clock.tick(self.FPS)
+            pg.display.set_caption(f'{self.clock.get_fps()}')
+        self.clear_groups()
+
+    def add_killed(self):
+        self.killed_enemies += 1
+        if self.killed_enemies == self.max_enemies:
+            self.board.event_win()
+
     def clear_groups(self):
         for group in GLOBAL.ALL_GROUPS:
             group.empty()
+
+    def terminate(self):
+        self.playing = False
+
+    def spawn_tanks(self):
+        self.tick = (self.tick + 1) % self.spawn_speed
+        if self.tick == 0 and self.spawned_enemies < self.max_enemies:
+            spwn = random.choice(self.spawn_points)
+            Enemy(self.board, self.last_x, self.last_y, self.last_map, x=spwn[0], y=spwn[1])
+            self.spawned_enemies += 1
+
+    def win(self):
+        ui.Image(GLOBAL.win_sprite, GLOBAL.game_ui_layout, center=True, text=f'{self.killed_enemies}')
+        b = ui.Button(GLOBAL.next_button_sprite, GLOBAL.game_ui_layout, center=True, y=-100,
+                      func=lambda: self.terminate(),
+                      scene=self.map)
+        GLOBAL.win_sound.play()
+
+    def game_over_screen(self):
+        ui.Image(GLOBAL.game_over_sprite, GLOBAL.game_ui_layout, center=True)
+        self.is_dead = True
 
     def movement(self, tank):
         for event in pg.event.get():
@@ -120,25 +136,15 @@ class App:
         tank.movement()
         return True
 
-    def run_map(self, mp):
-        self.map = mp
-        self.tick = 0
-        self.spawned_enemies = 0
-        self.killed_enemies = 0
-        self.spawn_points, (x, y), self.last_x, self.last_y, self.last_map = LoadData.load_level(self.board, mp)
-        tank = Player(self.board, x=x, y=y)
+
+class App:
+    def __init__(self):
+        self.screen = pg.display.set_mode(GLOBAL.SIZE, pg.RESIZABLE)
+        self.clock = pg.time.Clock()
+        self.FPS = 60
+        self.map = ''
         self.playing = True
-        playing = True
-        while playing:
-            playing = self.movement(tank)
-            if not self.playing:
-                playing = False
-            self.draw_layouts()
-            GLOBAL.event_tick()
-            pg.display.flip()
-            self.clock.tick(self.FPS)
-            pg.display.set_caption(f'{self.clock.get_fps()}')
-        self.clear_groups()
+        self.full_screen = False
 
     def on_off_full(self):
         self.full_screen = not self.full_screen
@@ -151,27 +157,27 @@ class App:
             GLOBAL.SIZE = self.screen.get_size()
             GLOBAL.event_window_resize()
 
+    def start_level(self, level):
+        l = Level(self.screen, self.clock, self.FPS, level, 10)
+        l.run_map()
+
     def run_menu(self):
         def close_menu():
             self.running = False
 
         tank = ui.Image(GLOBAL.player_sprite, GLOBAL.menu_ui_layout, x=100, y=-100, center=True, angle=90, size=3)
-        but1 = ui.Button([GLOBAL.indestructible_wall_sprite,
-                          GLOBAL.wall_sprite,
-                          GLOBAL.ice_sprite], GLOBAL.menu_ui_layout,
-                         x=0, y=-100, center=True, func=lambda: self.run_map("map1.txt"))
+        but1 = ui.Button(GLOBAL.start_sprite, GLOBAL.menu_ui_layout,
+                         x=0, y=-100, center=True, func=lambda: self.start_level("map1.txt"))
         but1.on_touch.connect(lambda: tank.transform.set_position(100, -100))
-        but2 = ui.Button([GLOBAL.indestructible_wall_sprite,
-                          GLOBAL.wall_sprite,
-                          GLOBAL.ice_sprite], GLOBAL.menu_ui_layout,
-                         x=0, y=0, center=True, func=lambda: self.run_map("map3.txt"))
+        but2 = ui.Button(GLOBAL.start_sprite, GLOBAL.menu_ui_layout,
+                         x=0, y=0, center=True, func=lambda: self.start_level("map3.txt"))
         but2.on_touch.connect(lambda: tank.transform.set_position(100, 0))
-        but3 = ui.Button([GLOBAL.indestructible_wall_sprite,
-                          GLOBAL.wall_sprite,
-                          GLOBAL.ice_sprite], GLOBAL.menu_ui_layout,
+        but3 = ui.Button(GLOBAL.exit_sprite, GLOBAL.menu_ui_layout,
                          x=0, y=100, center=True, func=close_menu)
         but3.on_touch.connect(lambda: tank.transform.set_position(100, 100))
-        ui.Button(GLOBAL.sound_button_sprite, GLOBAL.menu_ui_layout, x=0, y=200, center=True, func=self.on_off_full)
+        but4 = ui.Button(GLOBAL.sound_button_sprite, GLOBAL.menu_ui_layout, x=0, y=200,
+                         center=True, func=self.on_off_full)
+        but4.on_touch.connect(lambda: tank.transform.set_position(100, 200))
         self.running = True
         while self.running:
             for event in pg.event.get():

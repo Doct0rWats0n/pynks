@@ -53,6 +53,7 @@ class Tank(GameObject):
     def add_tick(self):
         self.cur_tick += 1 if self.cur_tick < self.reload_speed else 0
 
+    @live
     def shot(self):
         """ Обработка выстрела """
         if self.cur_tick == self.reload_speed:
@@ -84,10 +85,11 @@ class Tank(GameObject):
     def death(self):
         """ Обработка смерти """
         self.is_dead = True
-        GLOBAL.event_kill()
+        self.board.event_kill()
         for i in self.collides:
             i.disconnect()
             i.kill()
+        self.collides.clear()
         self.disconnect()
         blocks.Boom(self.board, x=self.transform.x, y=self.transform.y)
         GLOBAL.explosion.play()
@@ -106,14 +108,31 @@ class Player(Tank):
         self.enemy_bullet_group = GLOBAL.enemy_bullet_layout
         self.this_bullet_group = GLOBAL.player_bullet_layout
         self.reload_speed = 30
-        GLOBAL.event_defeat.connect(self.death)
+        self.board.event_defeat.connect(self.death)
+
+    def death(self):
+        self.is_dead = True
+        for i in self.collides:
+            i.disconnect()
+            i.kill()
+        self.disconnect()
+        blocks.Boom(self.board, x=self.transform.x, y=self.transform.y)
+        GLOBAL.explosion.play()
+        self.kill()
+
+    def check_tick(self):
+        if pg.sprite.spritecollideany(self, self.enemy_bullet_group) and not self.is_dead:
+            self.board.event_defeat()
+        if pg.sprite.spritecollideany(self, GLOBAL.bonus_layout) and not self.is_took_bonus:
+            pg.sprite.spritecollideany(self, GLOBAL.bonus_layout).kill()
+            self.activate_bonus()
 
     def disconnect(self):
-        GLOBAL.event_tick.disconnect(self.check_tick)
-        GLOBAL.event_change_size.disconnect(self.change_sprite_size)
-        GLOBAL.event_change_view.disconnect(self.render)
-        GLOBAL.event_tick.disconnect(self.add_tick)
-        GLOBAL.event_defeat.disconnect(self.death)
+        self.board.event_tick.disconnect(self.check_tick)
+        self.board.event_change_size.disconnect(self.change_sprite_size)
+        self.board.event_change_view.disconnect(self.render)
+        self.board.event_tick.disconnect(self.add_tick)
+        self.board.event_defeat.disconnect(self.death)
 
     def movement(self):
         pressed_keys = pg.key.get_pressed()
@@ -130,9 +149,26 @@ class Player(Tank):
 class Enemy(Tank):
     def __init__(self, board, last_x, last_y, last_map, x=0, y=0):
         super().__init__(board, GLOBAL.enemy_sprite, x=x, y=y)
+        self.reload_speed = 20
         self.way = way_finder.get_way(y, x, last_x, last_y, last_map)
         self.cur_move = self.way.pop()[::-1]
         self.t_x, self.t_y = x + self.cur_move[0], y + self.cur_move[1]
+
+    def clear(self):
+        self.is_dead = True
+        for i in self.collides:
+            i.disconnect()
+            i.kill()
+        self.disconnect()
+        blocks.Boom(self.board, x=self.transform.x, y=self.transform.y)
+        GLOBAL.explosion.play()
+        self.kill()
+
+    def disconnect(self):
+        self.board.event_tick.disconnect(self.check_tick)
+        self.board.event_change_size.disconnect(self.change_sprite_size)
+        self.board.event_change_view.disconnect(self.render)
+        self.board.event_tick.disconnect(self.add_tick)
 
     def check_tick(self):
         if pg.sprite.spritecollideany(self, self.enemy_bullet_group) and not self.is_dead:
@@ -163,7 +199,7 @@ class Bullet(GameObject):
         self.speed = speed
         self.power = power
         self.change_sprite_size()
-        GLOBAL.event_tick.connect(self.move)
+        self.board.event_tick.connect(self.move)
         self.is_boomed = False
         self.vec = [0, 0]
         if self.transform.angle == 360:
@@ -186,6 +222,6 @@ class Bullet(GameObject):
             blocks.Boom(self.board, self.transform.x - 0.5,
                         self.transform.y - 0.5)
             self.disconnect()
-            GLOBAL.event_tick.disconnect(self.move)
+            self.board.event_tick.disconnect(self.move)
             self.kill()
         self.event_on_move()

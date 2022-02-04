@@ -46,7 +46,7 @@ class Base(Block):
     def check_tick(self):
         if pg.sprite.spritecollideany(self, GLOBAL.bullet_layout) and not self.is_defeat:
             self.is_defeat = True
-            GLOBAL.event_defeat()
+            self.board.event_defeat()
             self.disconnect()
             self.kill()
 

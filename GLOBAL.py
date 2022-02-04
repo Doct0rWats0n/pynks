@@ -63,6 +63,8 @@ sound_button_sprite = LoadData.load_sheet('sound.png', columns=3)
 barrel_sprite = LoadData.load_sheet("red_barrel_sheet.png", columns=2)
 boom_sprite = LoadData.load_sheet("boom_sheet.png", columns=3)
 bonus_speed_sprite = LoadData.load_sheet('bonus_speed.png', columns=2)
+exit_sprite = LoadData.load_sheet('buttons/exit.png', rows=3)
+start_sprite = LoadData.load_sheet('buttons/start.png', rows=3)
 
 
 hit_sound = LoadData.load_sound("tank_hit.wav")
@@ -87,7 +89,7 @@ event_kill = Event()
 
 MIN_CELL_SIZE = 10
 MAX_CELL_SIZE = 100
-OPEN_CELLS = ['.', '"', 'B', 'T', 'X', '~']
+OPEN_CELLS = ['.', '"', 'B', 'T', 'X', '~', 'I']
 
 im = Image.new(mode='1', size=(1, 1))
 collide_sprite = pygame.image.fromstring(im.tobytes(), im.size, 'P')
